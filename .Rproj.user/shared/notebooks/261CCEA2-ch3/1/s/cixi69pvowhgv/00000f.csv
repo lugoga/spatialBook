@@ -1,0 +1,3 @@
+"0","as.Date(""07/Aug/12"") "
+"2","Error in charToDate(x) : 字符串的格式不够标准明确
+"

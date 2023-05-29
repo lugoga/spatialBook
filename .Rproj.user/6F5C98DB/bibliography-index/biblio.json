@@ -1,0 +1,918 @@
+{
+    "sources": [
+        {
+            "DOI": "10.1093/comjnl/27.2.97",
+            "ISSN": "0010-4620",
+            "URL": "https://doi.org/10.1093/comjnl/27.2.97",
+            "author": [
+                {
+                    "family": "Knuth",
+                    "given": "Donald E."
+                }
+            ],
+            "container-title": "Comput. J.",
+            "id": "knuth84",
+            "issue": "2",
+            "issued": {
+                "date-parts": [
+                    [
+                        1984,
+                        5
+                    ]
+                ]
+            },
+            "page": "97-111",
+            "publisher": "Oxford University Press, Inc.",
+            "publisher-place": "USA",
+            "title": "Literate programming",
+            "type": "article-journal",
+            "volume": "27"
+        },
+        {
+            "URL": "https://www.R-project.org/",
+            "author": [
+                {
+                    "literal": "R Core Team"
+                }
+            ],
+            "id": "R-base",
+            "issued": {
+                "date-parts": [
+                    [
+                        2022
+                    ]
+                ]
+            },
+            "publisher": "R Foundation for Statistical Computing",
+            "publisher-place": "Vienna, Austria",
+            "title": "R: A language and environment for statistical computing",
+            "title-short": "R",
+            "type": "book"
+        },
+        {
+            "URL": "https://CRAN.R-project.org/package=dplyr",
+            "author": [
+                {
+                    "family": "Wickham",
+                    "given": "Hadley"
+                },
+                {
+                    "family": "François",
+                    "given": "Romain"
+                },
+                {
+                    "family": "Henry",
+                    "given": "Lionel"
+                },
+                {
+                    "family": "Müller",
+                    "given": "Kirill"
+                }
+            ],
+            "id": "dplyr",
+            "issued": {
+                "date-parts": [
+                    [
+                        2022
+                    ]
+                ]
+            },
+            "note": "R package version 1.0.10",
+            "title": "Dplyr: A grammar of data manipulation",
+            "title-short": "Dplyr",
+            "type": "book"
+        },
+        {
+            "URL": "https://CRAN.R-project.org/package=magrittr",
+            "author": [
+                {
+                    "family": "Bache",
+                    "given": "Stefan Milton"
+                },
+                {
+                    "family": "Wickham",
+                    "given": "Hadley"
+                }
+            ],
+            "id": "magrittr",
+            "issued": {
+                "date-parts": [
+                    [
+                        2022
+                    ]
+                ]
+            },
+            "note": "R package version 2.0.3",
+            "title": "Magrittr: A forward-pipe operator for r",
+            "title-short": "Magrittr",
+            "type": "book"
+        },
+        {
+            "URL": "https://CRAN.R-project.org/package=readr",
+            "author": [
+                {
+                    "family": "Wickham",
+                    "given": "Hadley"
+                },
+                {
+                    "family": "Hester",
+                    "given": "Jim"
+                },
+                {
+                    "family": "Bryan",
+                    "given": "Jennifer"
+                }
+            ],
+            "id": "readr",
+            "issued": {
+                "date-parts": [
+                    [
+                        2022
+                    ]
+                ]
+            },
+            "note": "R package version 2.1.2",
+            "title": "Readr: Read rectangular text data",
+            "title-short": "Readr",
+            "type": "book"
+        },
+        {
+            "URL": "https://CRAN.R-project.org/package=tibble",
+            "author": [
+                {
+                    "family": "Müller",
+                    "given": "Kirill"
+                },
+                {
+                    "family": "Wickham",
+                    "given": "Hadley"
+                }
+            ],
+            "id": "tibble",
+            "issued": {
+                "date-parts": [
+                    [
+                        2022
+                    ]
+                ]
+            },
+            "note": "R package version 3.1.8",
+            "title": "Tibble: Simple data frames",
+            "title-short": "Tibble",
+            "type": "book"
+        },
+        {
+            "URL": "https://CRAN.R-project.org/package=stringr",
+            "author": [
+                {
+                    "family": "Wickham",
+                    "given": "Hadley"
+                }
+            ],
+            "id": "stringr",
+            "issued": {
+                "date-parts": [
+                    [
+                        2019
+                    ]
+                ]
+            },
+            "note": "R package version 1.4.0",
+            "title": "Stringr: Simple, consistent wrappers for common string operations",
+            "title-short": "Stringr",
+            "type": "book"
+        },
+        {
+            "URL": "https://CRAN.R-project.org/package=tidyr",
+            "author": [
+                {
+                    "family": "Wickham",
+                    "given": "Hadley"
+                },
+                {
+                    "family": "Girlich",
+                    "given": "Maximilian"
+                }
+            ],
+            "id": "tidyr",
+            "issued": {
+                "date-parts": [
+                    [
+                        2022
+                    ]
+                ]
+            },
+            "note": "R package version 1.2.0",
+            "title": "Tidyr: Tidy messy data",
+            "title-short": "Tidyr",
+            "type": "book"
+        },
+        {
+            "ISBN": "978-3-319-24277-4",
+            "URL": "https://ggplot2.tidyverse.org",
+            "author": [
+                {
+                    "family": "Wickham",
+                    "given": "Hadley"
+                }
+            ],
+            "id": "ggplot",
+            "issued": {
+                "date-parts": [
+                    [
+                        2016
+                    ]
+                ]
+            },
+            "publisher": "Springer-Verlag New York",
+            "title": "ggplot2: Elegant graphics for data analysis",
+            "title-short": "ggplot2",
+            "type": "book"
+        },
+        {
+            "author": [
+                {
+                    "literal": "Wikipedia contributors"
+                }
+            ],
+            "id": "wiki",
+            "issued": {
+                "date-parts": [
+                    [
+                        2022
+                    ]
+                ]
+            },
+            "note": "[Online; accessed 4-December-2022]",
+            "publisher": "https://en.wikipedia.org/w/index.php?title=Science&oldid=1125567070",
+            "title": "Science — Wikipedia, the free encyclopedia",
+            "type": ""
+        },
+        {
+            "DOI": "10.21105/joss.04684",
+            "author": [
+                {
+                    "family": "Patil",
+                    "given": "Indrajeet"
+                },
+                {
+                    "family": "Makowski",
+                    "given": "Dominique"
+                },
+                {
+                    "family": "Ben-Shachar",
+                    "given": "Mattan S."
+                },
+                {
+                    "family": "Wiernik",
+                    "given": "Brenton M."
+                },
+                {
+                    "family": "Bacher",
+                    "given": "Etienne"
+                },
+                {
+                    "family": "Lüdecke",
+                    "given": "Daniel"
+                }
+            ],
+            "container-title": "Journal of Open Source Software",
+            "id": "datawizard",
+            "issue": "78",
+            "issued": {
+                "date-parts": [
+                    [
+                        2022
+                    ]
+                ]
+            },
+            "page": "4684",
+            "title": "datawizard: An R package for easy data preparation and statistical transformations",
+            "title-short": "datawizard",
+            "type": "article-journal",
+            "volume": "7"
+        },
+        {
+            "URL": "https://CRAN.R-project.org/package=skimr",
+            "author": [
+                {
+                    "family": "Waring",
+                    "given": "Elin"
+                },
+                {
+                    "family": "Quinn",
+                    "given": "Michael"
+                },
+                {
+                    "family": "McNamara",
+                    "given": "Amelia"
+                },
+                {
+                    "family": "Arino de la Rubia",
+                    "given": "Eduardo"
+                },
+                {
+                    "family": "Zhu",
+                    "given": "Hao"
+                },
+                {
+                    "family": "Ellis",
+                    "given": "Shannon"
+                }
+            ],
+            "id": "skimr",
+            "issued": {
+                "date-parts": [
+                    [
+                        2021
+                    ]
+                ]
+            },
+            "note": "R package version 2.1.3",
+            "title": "Skimr: Compact and flexible summaries of data",
+            "title-short": "Skimr",
+            "type": "book"
+        },
+        {
+            "URL": "https://github.com/fishR-Core-Team/FSA",
+            "author": [
+                {
+                    "family": "Ogle",
+                    "given": "Derek H."
+                },
+                {
+                    "family": "Doll",
+                    "given": "Jason C."
+                },
+                {
+                    "family": "Wheeler",
+                    "given": "Powell"
+                },
+                {
+                    "family": "Dinno",
+                    "given": "Alexis"
+                }
+            ],
+            "id": "fsa",
+            "issued": {
+                "date-parts": [
+                    [
+                        2022
+                    ]
+                ]
+            },
+            "note": "R package version 0.9.3",
+            "title": "FSA: Fisheries stock analysis",
+            "title-short": "FSA",
+            "type": "book"
+        },
+        {
+            "URL": "https://CRAN.R-project.org/package=ggpmisc",
+            "author": [
+                {
+                    "family": "Aphalo",
+                    "given": "Pedro J."
+                }
+            ],
+            "id": "ggpmisc",
+            "issued": {
+                "date-parts": [
+                    [
+                        2021
+                    ]
+                ]
+            },
+            "note": "R package version 0.4.5",
+            "title": "Ggpmisc: Miscellaneous extensions to ’ggplot2’",
+            "title-short": "Ggpmisc",
+            "type": "book"
+        },
+        {
+            "DOI": "10.32614/RJ-2018-009",
+            "URL": "https://doi.org/10.32614/RJ-2018-009",
+            "author": [
+                {
+                    "family": "Pebesma",
+                    "given": "Edzer"
+                }
+            ],
+            "container-title": "The R Journal",
+            "id": "sf",
+            "issue": "1",
+            "issued": {
+                "date-parts": [
+                    [
+                        2018
+                    ]
+                ]
+            },
+            "page": "439-446",
+            "title": "Simple Features for R: Standardized Support for Spatial Vector Data",
+            "type": "article-journal",
+            "volume": "10"
+        },
+        {
+            "DOI": "10.18637/jss.v027.i03",
+            "author": [
+                {
+                    "family": "Hyndman",
+                    "given": "Rob J"
+                },
+                {
+                    "family": "Khandakar",
+                    "given": "Yeasmin"
+                }
+            ],
+            "container-title": "Journal of Statistical Software",
+            "id": "forecast",
+            "issue": "3",
+            "issued": {
+                "date-parts": [
+                    [
+                        2008
+                    ]
+                ]
+            },
+            "page": "1-22",
+            "title": "Automatic time series forecasting: The forecast package for R",
+            "title-short": "Automatic time series forecasting",
+            "type": "article-journal",
+            "volume": "26"
+        },
+        {
+            "URL": "https://CRAN.R-project.org/package=trend",
+            "author": [
+                {
+                    "family": "Pohlert",
+                    "given": "Thorsten"
+                }
+            ],
+            "id": "trend",
+            "issued": {
+                "date-parts": [
+                    [
+                        2020
+                    ]
+                ]
+            },
+            "note": "R package version 1.1.4",
+            "title": "Trend: Non-parametric trend tests and change-point detection",
+            "title-short": "Trend",
+            "type": "book"
+        },
+        {
+            "URL": "https://CRAN.R-project.org/package=TSstudio",
+            "author": [
+                {
+                    "family": "Krispin",
+                    "given": "Rami"
+                }
+            ],
+            "id": "tsstudio",
+            "issued": {
+                "date-parts": [
+                    [
+                        2020
+                    ]
+                ]
+            },
+            "note": "R package version 0.1.6",
+            "title": "TSstudio: Functions for time series analysis and forecasting",
+            "title-short": "TSstudio",
+            "type": "book"
+        },
+        {
+            "DOI": "10.32614/RJ-2017-009",
+            "author": [
+                {
+                    "family": "Moritz",
+                    "given": "Steffen"
+                },
+                {
+                    "family": "Bartz-Beielstein",
+                    "given": "Thomas"
+                }
+            ],
+            "container-title": "The R Journal",
+            "id": "imputets",
+            "issue": "1",
+            "issued": {
+                "date-parts": [
+                    [
+                        2017
+                    ]
+                ]
+            },
+            "page": "207-218",
+            "title": "imputeTS: Time Series Missing Value Imputation in R",
+            "type": "article-journal",
+            "volume": "9"
+        },
+        {
+            "URL": "https://CRAN.R-project.org/package=ggpubr",
+            "author": [
+                {
+                    "family": "Kassambara",
+                    "given": "Alboukadel"
+                }
+            ],
+            "id": "ggpubr",
+            "issued": {
+                "date-parts": [
+                    [
+                        2020
+                    ]
+                ]
+            },
+            "note": "R package version 0.4.0",
+            "title": "Ggpubr: ’ggplot2’ based publication ready plots",
+            "title-short": "Ggpubr",
+            "type": "book"
+        },
+        {
+            "author": [
+                {
+                    "family": "Semba",
+                    "given": "Masumbuko"
+                },
+                {
+                    "family": "Lumpkin",
+                    "given": "Rick"
+                },
+                {
+                    "family": "Kimirei",
+                    "given": "Ismael"
+                },
+                {
+                    "family": "Shaghude",
+                    "given": "Yohanna"
+                },
+                {
+                    "family": "Nyandwi",
+                    "given": "Ntahondi"
+                }
+            ],
+            "container-title": "PloS one",
+            "id": "semba2019seasonal",
+            "issue": "1",
+            "issued": {
+                "date-parts": [
+                    [
+                        2019
+                    ]
+                ]
+            },
+            "page": "e0210303",
+            "publisher": "Public Library of Science San Francisco, CA USA",
+            "title": "Seasonal and spatial variation of surface current in the pemba channel, tanzania",
+            "type": "article-journal",
+            "volume": "14"
+        },
+        {
+            "URL": "https://CRAN.R-project.org/package=patchwork",
+            "author": [
+                {
+                    "family": "Pedersen",
+                    "given": "Thomas Lin"
+                }
+            ],
+            "id": "patchwork",
+            "issued": {
+                "date-parts": [
+                    [
+                        2020
+                    ]
+                ]
+            },
+            "note": "R package version 1.1.1",
+            "title": "Patchwork: The composer of plots",
+            "title-short": "Patchwork",
+            "type": "book"
+        },
+        {
+            "URL": "https://www.jstatsoft.org/v40/i03/",
+            "author": [
+                {
+                    "family": "Grolemund",
+                    "given": "Garrett"
+                },
+                {
+                    "family": "Wickham",
+                    "given": "Hadley"
+                }
+            ],
+            "container-title": "Journal of Statistical Software",
+            "id": "lubridate",
+            "issue": "3",
+            "issued": {
+                "date-parts": [
+                    [
+                        2011
+                    ]
+                ]
+            },
+            "page": "1-25",
+            "title": "Dates and times made easy with lubridate",
+            "type": "article-journal",
+            "volume": "40"
+        },
+        {
+            "URL": "https://CRAN.R-project.org/package=readxl",
+            "author": [
+                {
+                    "family": "Wickham",
+                    "given": "Hadley"
+                },
+                {
+                    "family": "Bryan",
+                    "given": "Jennifer"
+                }
+            ],
+            "id": "readxl",
+            "issued": {
+                "date-parts": [
+                    [
+                        2022
+                    ]
+                ]
+            },
+            "note": "R package version 1.4.0",
+            "title": "Readxl: Read excel files",
+            "title-short": "Readxl",
+            "type": "book"
+        },
+        {
+            "DOI": "10.21105/joss.01686",
+            "author": [
+                {
+                    "family": "Wickham",
+                    "given": "Hadley"
+                },
+                {
+                    "family": "Averick",
+                    "given": "Mara"
+                },
+                {
+                    "family": "Bryan",
+                    "given": "Jennifer"
+                },
+                {
+                    "family": "Chang",
+                    "given": "Winston"
+                },
+                {
+                    "family": "McGowan",
+                    "given": "Lucy D’Agostino"
+                },
+                {
+                    "family": "François",
+                    "given": "Romain"
+                },
+                {
+                    "family": "Grolemund",
+                    "given": "Garrett"
+                },
+                {
+                    "family": "Hayes",
+                    "given": "Alex"
+                },
+                {
+                    "family": "Henry",
+                    "given": "Lionel"
+                },
+                {
+                    "family": "Hester",
+                    "given": "Jim"
+                },
+                {
+                    "family": "Kuhn",
+                    "given": "Max"
+                },
+                {
+                    "family": "Pedersen",
+                    "given": "Thomas Lin"
+                },
+                {
+                    "family": "Miller",
+                    "given": "Evan"
+                },
+                {
+                    "family": "Bache",
+                    "given": "Stephan Milton"
+                },
+                {
+                    "family": "Müller",
+                    "given": "Kirill"
+                },
+                {
+                    "family": "Ooms",
+                    "given": "Jeroen"
+                },
+                {
+                    "family": "Robinson",
+                    "given": "David"
+                },
+                {
+                    "family": "Seidel",
+                    "given": "Dana Paige"
+                },
+                {
+                    "family": "Spinu",
+                    "given": "Vitalie"
+                },
+                {
+                    "family": "Takahashi",
+                    "given": "Kohske"
+                },
+                {
+                    "family": "Vaughan",
+                    "given": "Davis"
+                },
+                {
+                    "family": "Wilke",
+                    "given": "Claus"
+                },
+                {
+                    "family": "Woo",
+                    "given": "Kara"
+                },
+                {
+                    "family": "Yutani",
+                    "given": "Hiroaki"
+                }
+            ],
+            "container-title": "Journal of Open Source Software",
+            "id": "tidyverse",
+            "issue": "43",
+            "issued": {
+                "date-parts": [
+                    [
+                        2019
+                    ]
+                ]
+            },
+            "page": "1686",
+            "title": "Welcome to the tidyverse",
+            "type": "article-journal",
+            "volume": "4"
+        },
+        {
+            "author": [
+                {
+                    "literal": "Wikipedia contributors"
+                }
+            ],
+            "id": "rstudio",
+            "issued": {
+                "date-parts": [
+                    [
+                        2022
+                    ]
+                ]
+            },
+            "note": "[Online; accessed 26-December-2022]",
+            "publisher": "https://en.wikipedia.org/w/index.php?title=RStudio&oldid=1126599961",
+            "title": "RStudio — Wikipedia, the free encyclopedia",
+            "type": ""
+        },
+        {
+            "author": [
+                {
+                    "family": "Wilkinson",
+                    "given": "Leland"
+                }
+            ],
+            "container-title": "Handbook of computational statistics",
+            "id": "wilkinson2012grammar",
+            "issued": {
+                "date-parts": [
+                    [
+                        2012
+                    ]
+                ]
+            },
+            "page": "375-414",
+            "publisher": "Springer",
+            "title": "The grammar of graphics",
+            "type": "chapter"
+        },
+        {
+            "DOI": "10.21105/joss.01686",
+            "author": [
+                {
+                    "family": "Wickham",
+                    "given": "Hadley"
+                },
+                {
+                    "family": "Averick",
+                    "given": "Mara"
+                },
+                {
+                    "family": "Bryan",
+                    "given": "Jennifer"
+                },
+                {
+                    "family": "Chang",
+                    "given": "Winston"
+                },
+                {
+                    "family": "McGowan",
+                    "given": "Lucy D’Agostino"
+                },
+                {
+                    "family": "François",
+                    "given": "Romain"
+                },
+                {
+                    "family": "Grolemund",
+                    "given": "Garrett"
+                },
+                {
+                    "family": "Hayes",
+                    "given": "Alex"
+                },
+                {
+                    "family": "Henry",
+                    "given": "Lionel"
+                },
+                {
+                    "family": "Hester",
+                    "given": "Jim"
+                },
+                {
+                    "family": "Kuhn",
+                    "given": "Max"
+                },
+                {
+                    "family": "Pedersen",
+                    "given": "Thomas Lin"
+                },
+                {
+                    "family": "Miller",
+                    "given": "Evan"
+                },
+                {
+                    "family": "Bache",
+                    "given": "Stephan Milton"
+                },
+                {
+                    "family": "Müller",
+                    "given": "Kirill"
+                },
+                {
+                    "family": "Ooms",
+                    "given": "Jeroen"
+                },
+                {
+                    "family": "Robinson",
+                    "given": "David"
+                },
+                {
+                    "family": "Seidel",
+                    "given": "Dana Paige"
+                },
+                {
+                    "family": "Spinu",
+                    "given": "Vitalie"
+                },
+                {
+                    "family": "Takahashi",
+                    "given": "Kohske"
+                },
+                {
+                    "family": "Vaughan",
+                    "given": "Davis"
+                },
+                {
+                    "family": "Wilke",
+                    "given": "Claus"
+                },
+                {
+                    "family": "Woo",
+                    "given": "Kara"
+                },
+                {
+                    "family": "Yutani",
+                    "given": "Hiroaki"
+                }
+            ],
+            "container-title": "Journal of Open Source Software",
+            "id": "tidyverse",
+            "issue": "43",
+            "issued": {
+                "date-parts": [
+                    [
+                        2019
+                    ]
+                ]
+            },
+            "page": "1686",
+            "title": "Welcome to the tidyverse",
+            "type": "article-journal",
+            "volume": "4"
+        }
+    ],
+    "project_biblios": [
+        "references.bib"
+    ]
+}

@@ -1,0 +1,820 @@
+# Tables, conditionals and loops
+
+## Aims
+
+Our aims in this chapter are:
+
+-   Learn to work with `data.frame`, the data structure used to represent tables in R
+
+-   Learn several automation methods for controlling code execution and automation in R:
+
+    -   Conditionals
+
+    -   Loops
+
+    -   The `apply` function
+
+-   Join between tables
+
+## Tables
+
+### What is a `data.frame`?
+
+A **table** in R is represented using the `data.frame` class. A `data.frame` is basically a collection of vectors comprising columns, all of the same length, but possibly of different types. Conventionally:
+
+-   Each table **row** represents an observation, with values possibly of a different type for each variable
+
+-   Each table **column** represents a variable, with values of the same type
+
+For example, the file `rainfall.csv`, which we are going to work with later on (Section [4.4](https://geobgu.xyz/r-2021/tables-conditionals-and-loops.html#reading-tables-from-a-file)), contains a table with information about meteorological stations in Israel (Figure [4.1](https://geobgu.xyz/r-2021/tables-conditionals-and-loops.html#fig:rainfall-csv-in-excel)). The table rows correspond to 169 meteorological stations. The table columns refer to different variables: station name (`character`), station coordinates (`numeric`), average monthly rainfall amounts (`numeric`), etc.
+
+Figure 4.1: `rainfall.csv` opened in Excel
+
+### Creating a `data.frame`
+
+A `data.frame` can be created with the `data.frame` function, given one or more vectors which become columns^[12](https://geobgu.xyz/r-2021/tables-conditionals-and-loops.html#fn12)^.
+
+For example, the following expression creates a table with four properties for three railway stations in Israel. The properties are:
+
+-   `name`---Station name
+
+-   `city`---The city where the station is located
+
+-   `lines`---The number of railway lines that go through the station
+
+-   `piano`---Does the station have a piano?
+
+```         
+dat = data.frame(   name = c("Beer-Sheva Center", "Beer-Sheva University", "Dimona"),   city = c("Beer-Sheva", "Beer-Sheva", "Dimona"),   lines = c(4, 5, 1),   piano = c(FALSE, TRUE, FALSE) ) dat ##                    name       city lines piano ## 1     Beer-Sheva Center Beer-Sheva     4 FALSE ## 2 Beer-Sheva University Beer-Sheva     5  TRUE ## 3                Dimona     Dimona     1 FALSE
+```
+
+Note that, in the above expression, the vectors that comprise the `data.frame` columns were created inside the function call. Alternatively, we can pass existing vectors to `data.frame`. For example, the following expression creates the same `data.frame` as above, this time using pre-defined vectors:
+
+```         
+name = c("Beer-Sheva Center", "Beer-Sheva University", "Dimona") city = c("Beer-Sheva", "Beer-Sheva", "Dimona") lines = c(4, 5, 1) piano = c(FALSE, TRUE, FALSE) dat = data.frame(name, city, lines, piano) dat ##                    name       city lines piano ## 1     Beer-Sheva Center Beer-Sheva     4 FALSE ## 2 Beer-Sheva University Beer-Sheva     5  TRUE ## 3                Dimona     Dimona     1 FALSE
+```
+
+### Interactive view of a `data.frame`
+
+The `View` function opens an interactive view of a `data.frame`. When using RStudio, the view also has **sort** and **filter** buttons (Figure [4.2](https://geobgu.xyz/r-2021/tables-conditionals-and-loops.html#fig:rstudio-view)). Note that sorting or filtering the view have no effect on the actual object.
+
+```         
+View(dat)
+```
+
+Figure 4.2: Table view in Rstudio
+
+### `data.frame` properties
+
+#### Dimensions
+
+Unlike a vector, which is one-dimensional---the number of elements is obtained with `length` (Section [2.3.4](https://geobgu.xyz/r-2021/vectors.html#calling-functions-on-a-vector))---a `data.frame` is two-dimensional. We can get the number of rows and number of columns in a `data.frame` with `nrow` and `ncol`, respectively:
+
+```         
+nrow(dat) ## [1] 3
+```
+
+```         
+ncol(dat) ## [1] 4
+```
+
+As an alternative, we can get both the number of rows and columns (in that order!), as a vector of length 2, with `dim`:
+
+```         
+dim(dat) ## [1] 3 4
+```
+
+#### Row and column names
+
+Any `data.frame` object also has row and column names, which we can get with `rownames` and `colnames`, respectively. Row names are usually meaningless, e.g., composed of consecutive numbers by default:
+
+```         
+rownames(dat) ## [1] "1" "2" "3"
+```
+
+Conversely, column names are usually meaningful variable names:
+
+```         
+colnames(dat) ## [1] "name"  "city"  "lines" "piano"
+```
+
+We can also *set* row or column names by assigning new values to these properties, or to subsets thereof. For example, here is how we can change the first column name:
+
+```         
+colnames(dat)[1] = "STATION_NAME" dat ##            STATION_NAME       city lines piano ## 1     Beer-Sheva Center Beer-Sheva     4 FALSE ## 2 Beer-Sheva University Beer-Sheva     5  TRUE ## 3                Dimona     Dimona     1 FALSE
+```
+
+and revert it back to the previous name:
+
+```         
+colnames(dat)[1] = "name" dat ##                    name       city lines piano ## 1     Beer-Sheva Center Beer-Sheva     4 FALSE ## 2 Beer-Sheva University Beer-Sheva     5  TRUE ## 3                Dimona     Dimona     1 FALSE
+```
+
+The `str` function gives a summary of any object structure. For `data.frame` objects, `str` lists the dimensions, as well as column names, types and (first few) values in each column:
+
+```         
+str(dat) ## 'data.frame':    3 obs. of  4 variables: ##  $ name : chr  "Beer-Sheva Center" "Beer-Sheva University" "Dimona" ##  $ city : chr  "Beer-Sheva" "Beer-Sheva" "Dimona" ##  $ lines: num  4 5 1 ##  $ piano: logi  FALSE TRUE FALSE
+```
+
+### `data.frame` subsetting
+
+#### Introduction
+
+A `data.frame` *subset* can be obtained with the `[` operator, which we are familiar with from vector subsetting (Sections [2.3.3](https://geobgu.xyz/r-2021/vectors.html#vector-subsetting-individual-elements) and [2.3.8](https://geobgu.xyz/r-2021/vectors.html#vector-subsetting-general)). Since a `data.frame` is a two-dimensional object, the `data.frame` subsetting method accepts two vectors:
+
+-   The first vector refers to *rows*
+
+-   The second vector refers to *columns*
+
+Each of these vectors can be one of the following types:
+
+-   `numeric`---Specifying the *indices* of rows/columns to retain
+
+-   `character`---Specifying the *names* of rows/columns to retain
+
+-   `logical`---Specifying *whether* to retain each row/column
+
+Either the rows or the column index can be omitted, in which case we get *all* rows or *all* columns, respectively. The following Sections [4.1.5.2](https://geobgu.xyz/r-2021/tables-conditionals-and-loops.html#numeric-index)--[4.1.5.5](https://geobgu.xyz/r-2021/tables-conditionals-and-loops.html#logical-index) give examples of the three `data.frame` subsetting methods.
+
+#### Numeric index
+
+Here are several examples of subsetting with a `numeric` index:
+
+```         
+dat[1, 1]        # Row 1, column 1 ## [1] "Beer-Sheva Center"
+```
+
+```         
+dat[c(1, 3), 2]  # Rows 1 & 3, column 2 ## [1] "Beer-Sheva" "Dimona"
+```
+
+```         
+dat[2, ]         # Row 2 ##                    name       city lines piano ## 2 Beer-Sheva University Beer-Sheva     5  TRUE
+```
+
+```         
+dat[, 2:1]       # Columns 2 & 1 ##         city                  name ## 1 Beer-Sheva     Beer-Sheva Center ## 2 Beer-Sheva Beer-Sheva University ## 3     Dimona                Dimona
+```
+
+As you may have noticed based on the way the output is printed, the first two expressions return a (`character`) vector, while the last two expressions return a `data.frame` (check using the `class` function!). Section [4.1.5.3](https://geobgu.xyz/r-2021/tables-conditionals-and-loops.html#the-drop-parameter) describes how the type of returned subset is determined, and how it can be controlled using the `drop` parameter.
+
+#### The `drop` parameter
+
+The subset operator `[` accepts an additional logical argument `drop`. The `drop` argument determines whether we would like to simplify the resulting subset to a simpler data structure, when possible, \"dropping\" the more complex class (`drop=TRUE`, the default), or whether we would like to always keep the subset in its original class (`drop=FALSE`).
+
+When applied to a `data.frame`, a subset that conatains a *single* `data.frame` column can be returned as:
+
+-   A vector (`drop=TRUE`, the default)
+
+-   A `data.frame` (`drop=FALSE`)
+
+A subset that contains *two or more* columns is returned as a `data.frame`, regardless of the `drop` argument value.
+
+In other words, we need to use `drop=FALSE` in case we want to make sure that the subset is returned as a `data.frame` no matter what. Otherwise, a subset composed of a single column is returned as a vector.
+
+For example, a subset that contains a single column is, by default, simplified to a vector:
+
+```         
+dat[1:2, 1] ## [1] "Beer-Sheva Center"     "Beer-Sheva University"
+```
+
+unless we specify `drop=FALSE`, in which case it remains a `data.frame`:
+
+```         
+dat[1:2, 1, drop = FALSE] ##                    name ## 1     Beer-Sheva Center ## 2 Beer-Sheva University
+```
+
+> Why do you think simplification works when taking a subset with a single *column*, but not on a subset with a single *row*?
+
+#### Character index
+
+We can also use a `character` index to specify the names of rows and/or columns to retain in the subset. A `character` index is mostly useful for subsetting *columns*, where names are meaningful (Section [4.1.4.2](https://geobgu.xyz/r-2021/tables-conditionals-and-loops.html#data-frame-row-and-column-names)). For example:
+
+```         
+dat[, "name"] ## [1] "Beer-Sheva Center"     "Beer-Sheva University" "Dimona"
+```
+
+```         
+dat[, c("name", "city")] ##                    name       city ## 1     Beer-Sheva Center Beer-Sheva ## 2 Beer-Sheva University Beer-Sheva ## 3                Dimona     Dimona
+```
+
+The `$` operator is a shortcut for getting a *single* column, by name, from a `data.frame`:
+
+```         
+dat$name ## [1] "Beer-Sheva Center"     "Beer-Sheva University" "Dimona"
+```
+
+```         
+dat$city ## [1] "Beer-Sheva" "Beer-Sheva" "Dimona"
+```
+
+#### Logical index
+
+The third option for a `data.frame` index is a `logical` vector, specifying *whether* to retain each row or column. Most often, a `logical` vector index is used to filter `data.frame` rows, based on the values of one or more columns. For example:
+
+```         
+dat[dat$city == "Beer-Sheva", ] ##                    name       city lines piano ## 1     Beer-Sheva Center Beer-Sheva     4 FALSE ## 2 Beer-Sheva University Beer-Sheva     5  TRUE
+```
+
+```         
+dat[dat$piano, ] ##                    name       city lines piano ## 2 Beer-Sheva University Beer-Sheva     5  TRUE
+```
+
+```         
+dat[dat$city == "Beer-Sheva" & !dat$piano, ] ##                name       city lines piano ## 1 Beer-Sheva Center Beer-Sheva     4 FALSE
+```
+
+> What is the meaning of the above three expressions, in plain language?
+
+Let\'s go back to the Kinneret example from Chapter [3](https://geobgu.xyz/r-2021/time-series-and-function-definitions.html#time-series-and-function-definitions). To do that, we once again define the three vectors `may`, `nov` and `year`:
+
+```         
+may = c(   -211.92,-208.80,-208.84,-209.12,-209.01,-209.60,-210.24,-210.46,-211.76,   -211.92,-213.13,-213.18,-209.74,-208.92,-209.73,-210.68,-211.10,-212.18,   -213.26,-212.65,-212.37 ) nov = c(   -212.79,-209.52,-209.72,-210.94,-210.85,-211.40,-212.01,-212.25,-213.00,   -213.71,-214.78,-214.34,-210.93,-210.69,-211.64,-212.03,-212.60,-214.23,   -214.33,-213.89,-213.68 ) year = 1991:2011
+```
+
+Now we already know how to combine the vectors into a `data.frame` (Section [4.1.2](https://geobgu.xyz/r-2021/tables-conditionals-and-loops.html#creating-a-data-frame)), using the `data.frame` function. The following expression combines `year`, `may` and `nov` into a `data.frame` named `kineret`:
+
+```         
+kineret = data.frame(year, may, nov) kineret ##    year     may     nov ## 1  1991 -211.92 -212.79 ## 2  1992 -208.80 -209.52 ## 3  1993 -208.84 -209.72 ## 4  1994 -209.12 -210.94 ## 5  1995 -209.01 -210.85 ## 6  1996 -209.60 -211.40 ## 7  1997 -210.24 -212.01 ## 8  1998 -210.46 -212.25 ## 9  1999 -211.76 -213.00 ## 10 2000 -211.92 -213.71 ## 11 2001 -213.13 -214.78 ## 12 2002 -213.18 -214.34 ## 13 2003 -209.74 -210.93 ## 14 2004 -208.92 -210.69 ## 15 2005 -209.73 -211.64 ## 16 2006 -210.68 -212.03 ## 17 2007 -211.10 -212.60 ## 18 2008 -212.18 -214.23 ## 19 2009 -213.26 -214.33 ## 20 2010 -212.65 -213.89 ## 21 2011 -212.37 -213.68
+```
+
+Using a logical index, we can get a subset of years when the Kinneret level in November was less than `-213`. Note that the following expression is identical to the one we used when working with separate vectors `year` and `nov` (Section [3.1.3](https://geobgu.xyz/r-2021/time-series-and-function-definitions.html#time-series)), except for the `dat$` part, which now specifies that we refer to `data.frame` columns:
+
+```         
+kineret$year[kineret$nov < -213] ## [1] 2000 2001 2002 2008 2009 2010 2011
+```
+
+When operating on a `data.frame`, we can also get a subset with data from *all* columns for the years of interest, as follows:
+
+```         
+kineret[kineret$nov < -213, ] ##    year     may     nov ## 10 2000 -211.92 -213.71 ## 11 2001 -213.13 -214.78 ## 12 2002 -213.18 -214.34 ## 18 2008 -212.18 -214.23 ## 19 2009 -213.26 -214.33 ## 20 2010 -212.65 -213.89 ## 21 2011 -212.37 -213.68
+```
+
+> What are the differences between the last two expressions? What is the reason for those differences?
+
+### Creating new columns
+
+Assignment into a `data.frame` column which does not yet exist adds a *new column*. For example, here is how we can add a new column named `d_nov`, containing differences between consecutive values in the `nov` column (Section [3.2.3](https://geobgu.xyz/r-2021/time-series-and-function-definitions.html#consecutive-differences)):
+
+```         
+kineret$d_nov = c(NA, diff(kineret$nov))
+```
+
+And here is the `data.frame`, now with a new (fourth) column:
+
+```         
+kineret ##    year     may     nov d_nov ## 1  1991 -211.92 -212.79    NA ## 2  1992 -208.80 -209.52  3.27 ## 3  1993 -208.84 -209.72 -0.20 ## 4  1994 -209.12 -210.94 -1.22 ## 5  1995 -209.01 -210.85  0.09 ## 6  1996 -209.60 -211.40 -0.55 ## 7  1997 -210.24 -212.01 -0.61 ## 8  1998 -210.46 -212.25 -0.24 ## 9  1999 -211.76 -213.00 -0.75 ## 10 2000 -211.92 -213.71 -0.71 ## 11 2001 -213.13 -214.78 -1.07 ## 12 2002 -213.18 -214.34  0.44 ## 13 2003 -209.74 -210.93  3.41 ## 14 2004 -208.92 -210.69  0.24 ## 15 2005 -209.73 -211.64 -0.95 ## 16 2006 -210.68 -212.03 -0.39 ## 17 2007 -211.10 -212.60 -0.57 ## 18 2008 -212.18 -214.23 -1.63 ## 19 2009 -213.26 -214.33 -0.10 ## 20 2010 -212.65 -213.89  0.44 ## 21 2011 -212.37 -213.68  0.21
+```
+
+## Flow control
+
+### Introduction
+
+The default execution mode is to let the computer execute all expressions in the same order they are given in the code. **Flow control** commands are a way to *modify* the sequence of code execution. We will learn two flow control operators, from two flow control categories:
+
+-   `if` and `else`---A **conditional**, conditioning the execution of code
+
+-   `for`---A **loop**, executing code more than once
+
+### Conditionals
+
+The purpose of the **conditional** is to condition the execution of code. An `if`/`else` conditional in R contains the following components:
+
+-   The `if` keyword
+
+-   A condition, inside parentheses (`(` and `)`)
+
+-   Code to be executed if the condition is `TRUE`, inside curly brackets (`{` and `}`)
+
+-   The `else` keyword (optional)
+
+-   Code to be executed if the condition is `FALSE`, inside curly brackets (`{` and `}`) (optional)
+
+The condition needs to be evaluated to a `logical` vector of length 1, containing either `TRUE` or `FALSE`. If the condition is `TRUE`, then the code section after `if` is executed. If the condition is `FALSE`, then the code section after `else` (when present) is executed.
+
+Here is the syntax of a conditional with `if`:
+
+```         
+if(condition) {   expressions }
+```
+
+and here is the syntax of a conditional with both `if` and the optional `else`:
+
+```         
+if(condition) {   trueExpressions } else {   falseExpressions }
+```
+
+The following examples demonstrate how the expression after `if` is executed when the condition is `TRUE`:
+
+```         
+x = 3 if(x > 2) print("x is large!") ## [1] "x is large!"
+```
+
+Note that the curly brackets (`{` and `}`) are omitted, because the code section contains one expression only, same as in a function definition (Section [3.3.4](https://geobgu.xyz/r-2021/time-series-and-function-definitions.html#returned-value)).
+
+When the condition is `FALSE`---nothing happens:
+
+```         
+x = 1 if(x > 2) print("x is large!")
+```
+
+Now let\'s also add a second expression after `else`. The first code section is still executed when the condition is `TRUE`:
+
+```         
+x = 3 if(x > 2) print("x is large!") else print("x is small!") ## [1] "x is large!"
+```
+
+When the condition is `FALSE`, however, the second code section is executed instead:
+
+```         
+x = 1 if(x > 2) print("x is large!") else print("x is small!") ## [1] "x is small!"
+```
+
+Conditionals are frequently used when our code branches into two scenarios, depending on the value of a particular object. For example, we can use a conditional to define (Section [3.3](https://geobgu.xyz/r-2021/time-series-and-function-definitions.html#defining-custom-functions)) our own version of the `abs` function (Section [2.3.4](https://geobgu.xyz/r-2021/vectors.html#calling-functions-on-a-vector)):
+
+```         
+abs2 = function(x) {   if(x < 0) return(-x) else return(x) }
+```
+
+Let\'s check if our custom function `abs2` works as expected:
+
+```         
+abs2(-3) ## [1] 3 abs2(0) ## [1] 0 abs2(24) ## [1] 24
+```
+
+It does (at least for arguments that are vectors of length 1)!
+
+> What happens when the argument of `abs2` is of length \>1, where the first element is negative and some of the other elements are positive? Can you guess what is the reason for this behavior, based on the warning message?
+
+### Loops
+
+A **loop** is used to execute a given code section more than once. The number of *times* the code is executed is determined in different ways in different types of loops. In a `for` loop, the number of times the code is executed is determined in advance, based on the length of a vector passed when the loop is initialized. The code is executed once for each element of the vector. In each \"round,\" the current element is assigned to a variable, which we can use in the loop code.
+
+A `for` loop is composed of the following parts:
+
+-   The `for` keyword
+
+-   The variable name `symbol`, which gets the current vector value
+
+-   The `in` keyword
+
+-   The vector `sequence`
+
+-   A code section `expressions`
+
+Here is the syntax of a `for` loop:
+
+```         
+for(symbol in sequence) {   expressions }
+```
+
+Note that the constant keywords are just `for` and `in`. All other components---namely, `symbol`, `sequence` and `expressions`---are varying, and it is up to us to choose their values.
+
+Here is an example of a `for` loop:
+
+```         
+for(i in 1:5) print(i) ## [1] 1 ## [1] 2 ## [1] 3 ## [1] 4 ## [1] 5
+```
+
+What has happened? The expression `print(i)` was executed 5 times, according to the length of the vector `1:5`. Each time, `i` got the next value of `1:5` and the code section printed that value on screen.
+
+The vector defining the `for` loop does not necessarily need to be numeric. For example:
+
+```         
+for(b in c("Test", "One", "Two")) print(b) ## [1] "Test" ## [1] "One" ## [1] "Two"
+```
+
+Here, expression `print(b)` was executed 3 times, according to the length of the vector `c("Test", "One", "Two")`. Each time, `b` got the next value of the vector and the code section printed `b` on screen.
+
+In case the vector is numeric, it does not necessarily need to be composed of consecutive:
+
+```         
+for(i in c(8,15,3)) print(i) ## [1] 8 ## [1] 15 ## [1] 3
+```
+
+Again, the expression `print(i)` was executed 3 times, now according to the length of the vector `c(8,15,3)`. Each time, `i` got the next value of the vector and the code section printed `i` on screen.
+
+The code section even does not have to use the current value of the vector:
+
+```         
+for(i in 1:5) print("A") ## [1] "A" ## [1] "A" ## [1] "A" ## [1] "A" ## [1] "A"
+```
+
+Here, the expression `print("A")` was executed 5 times, according to the length of the vector `1:5`. Each time, the code section printed the fixed value `"A"` on screen.
+
+The following `for` loop prints each of the numbers from 1 to 10 multiplied by 5:
+
+```         
+for(i in 1:10) print(i * 5) ## [1] 5 ## [1] 10 ## [1] 15 ## [1] 20 ## [1] 25 ## [1] 30 ## [1] 35 ## [1] 40 ## [1] 45 ## [1] 50
+```
+
+> How can we print a multiplication table for 1-10, using a `for` loop, as shown below?
+
+```         
+##  [1]  1  2  3  4  5  6  7  8  9 10 ##  [1]  2  4  6  8 10 12 14 16 18 20 ##  [1]  3  6  9 12 15 18 21 24 27 30 ##  [1]  4  8 12 16 20 24 28 32 36 40 ##  [1]  5 10 15 20 25 30 35 40 45 50 ##  [1]  6 12 18 24 30 36 42 48 54 60 ##  [1]  7 14 21 28 35 42 49 56 63 70 ##  [1]  8 16 24 32 40 48 56 64 72 80 ##  [1]  9 18 27 36 45 54 63 72 81 90 ##  [1]  10  20  30  40  50  60  70  80  90 100
+```
+
+As another example of using a `for` loop, we can write a function named `x_in_y`. The function accepts two vectors `x` and `y`. For each element in `x` the function checks *whether* it is found in `y`. It returns a `logical` vector of the same length as `x`.
+
+Here is an example of how the function is supposed to work:
+
+```         
+x = c(1, 2, 3, 4, 5) y = c(2, 1, 5, 5) x_in_y(x, y) ## [1]  TRUE  TRUE FALSE FALSE  TRUE
+```
+
+In plain terms, what we need to do is to go over the elements of `x`, each time checking whether the current element is equal to any of the elements in `y`. This is exactly the type of operation where a `for` loop comes in handy. We can use a `for` loop to check if each element in `x` is contained in `y`, as follows:
+
+```         
+for(i in x) print(any(i == y)) ## [1] TRUE ## [1] TRUE ## [1] FALSE ## [1] FALSE ## [1] TRUE
+```
+
+Inside a function, rather then printing we would like to \"collect\" the results into a vector. There are at least two ways to do it. One way it to start from `NULL`, which specifies an empty object (Section [1.3.5](https://geobgu.xyz/r-2021/the-r-environment.html#special-values)), then consecutively add new elements with `c`:
+
+```         
+x_in_y = function(x, y) {   result = NULL   for(i in x) result = c(result, any(i == y))   result }
+```
+
+Another way is to start from a vector composed of `NA` with the right length (`rep(NA, length(x))`), then fill-in the results using assignment:
+
+```         
+x_in_y = function(x, y) {   result = rep(NA, length(x))   for(i in 1:length(x)) result[i] = any(x[i] == y)   result }
+```
+
+Note the difference in the `for` loop vector that we go over in the two versions. In the first version, we go over the *elements* of `x`, therefore the loop is initialized with `for(i in x)`. In the second version, we go over the *indices* of `x`, therefore the loop is initialized with `for(i in 1:length(x))`.
+
+> Execute the above function definition and then the specific example shown earlier to demonstrate that the `x_in_y` function works properly.
+
+> What change(s) do we need to make in the `x_in_y` function to create a new function named `times_x_in_y`, which returns the *count* of occurences in `y` for each element in `x`, as shown below?
+
+```         
+times_x_in_y(x, y) ## [1] 1 1 0 0 2
+```
+
+Situations when we need to go over subsets of a dataset, process those subsets, then combine the results back to a single object, are very common in data processing. A `for` loop is the default approach for such tasks, unless there is a \"shortcut\" that we may prefer, such as the `apply` function (Section [4.5](https://geobgu.xyz/r-2021/tables-conditionals-and-loops.html#the-apply-function)). For example, we will come back to `for` loops when separately processing raster layers for several time periods (Section [11.3.2](https://geobgu.xyz/r-2021/processing-spatio-temporal-data.html#aggregating-time-periods)).
+
+## The `%in%` operator
+
+In fact, we don\'t need to write a function such as `x_in_y` (Section [4.2.3](https://geobgu.xyz/r-2021/tables-conditionals-and-loops.html#loops)) ourselves; we can use the `%in%` operator. The `%in%` operator, with an expression `x %in% y`, returns a `logical` vector indicating the *presence* of each element of `x` in `y`. For example:
+
+```         
+1:5 %in% c(1, 2, 5) ## [1]  TRUE  TRUE FALSE FALSE  TRUE
+```
+
+Keep in mind that the order of arguments of the `%in%` operator matters. Namely, we are evaluating the presence of the left-side vector in the right-side vector. Therefore, the following expression has a different meaning than the previous one:
+
+```         
+c(1, 2, 5) %in% 1:5 ## [1] TRUE TRUE TRUE
+```
+
+Here are two more examples using `%in%` with the `letters` and `LETTERS` built-in vectors. (Type the names of these two vectors to see what they are).
+
+```         
+c("a", "B", "c", "ee") %in% letters ## [1]  TRUE FALSE  TRUE FALSE
+```
+
+```         
+c("a", "B", "c", "ee") %in% LETTERS ## [1] FALSE  TRUE FALSE FALSE
+```
+
+## Reading tables from a file
+
+### Using `read.csv`
+
+In addition to creating a table with `data.frame` (Section [4.1.2](https://geobgu.xyz/r-2021/tables-conditionals-and-loops.html#creating-a-data-frame)), we can read an existing table from a file, such as from a Comma-Separated Values (CSV) file^[13](https://geobgu.xyz/r-2021/tables-conditionals-and-loops.html#fn13)^. This operation creates a `data.frame` object with file contents in the RAM (Figure [4.3](https://geobgu.xyz/r-2021/tables-conditionals-and-loops.html#fig:mass-storage-to-ram)).
+
+Figure 4.3: Reading a file takes information from the mass storage and loads it into the RAM. This figure is from [Murrell](https://geobgu.xyz/r-2021/references.html#ref-murrell2009) ([2009](https://geobgu.xyz/r-2021/references.html#ref-murrell2009)).
+
+In the next few examples in this chapter, we will work with the CSV file named `rainfall.csv` (Figure [4.1](https://geobgu.xyz/r-2021/tables-conditionals-and-loops.html#fig:rainfall-csv-in-excel)). This file contains a table with average monthly (September--May) rainfall data, based on the period of 1980-2010, in 169 meteorological stations in Israel. The table also contains station name, number, elevation above sea level, and X-Y coordinates.
+
+We can read a CSV file using the `read.csv` function, given the file path. For example, assuming the file `rainfall.csv` is located in the `C:\Data2` directory, we can read it using either of the following two expressions:
+
+```         
+read.csv("C:\\Data2\\rainfall.csv") read.csv("C:/Data2/rainfall.csv")
+```
+
+Note that the valid separating character is either `/` or `\\` (not the familiar `\`!). In case the file path uses the incorrect separator `\`, we get an error:
+
+```         
+read.csv("C:\Data2\rainfall.csv") ## Error: '\D' is an unrecognized escape in character string starting ""C:\D"
+```
+
+In case the path is correct but the requested file *does not exist*, we also get an error, but a different one:
+
+```         
+read.csv("C:\\Data2\\rainfall.csv") ## Warning in file(file, "rt"): cannot open file 'C:\Data2\rainfall.csv': No such ## file or directory ## Error in file(file, "rt"): cannot open the connection
+```
+
+When using the right path separator and a path to an existing file, reading should be successful, in which case a new `data.frame` is created in the R environment.
+
+### The working directory
+
+When reading files into R, there is another important concept we need to be aware of: the **working directory**. The R environment always points to a certain directory on our computer, which is knows as the working directory. We can *get* the current working directory with `getwd`:
+
+```         
+getwd() ## [1] "/home/michael/Dropbox/Courses/R_2021"
+```
+
+We can *set* a new working directory with `setwd`:
+
+```         
+setwd("C:\\Data2")
+```
+
+When reading a file from the working directory, we can specify just the file name instead of the full path:
+
+```         
+read.csv("rainfall.csv")
+```
+
+When reading and/or writing multiple files from the same directory, it is very convenient to set the working directory at the beginning of our script^[14](https://geobgu.xyz/r-2021/tables-conditionals-and-loops.html#fn14)^. That way, in the rest of our script, we can refer to the various files by file name only, rather than by the full path.
+
+### Example: the `rainfall.csv` dataset
+
+Let\'s *read* the `rainfall.csv` file into a `data.frame` object named `rainfall`:
+
+```         
+rainfall = read.csv("rainfall.csv")
+```
+
+This is a longer table than the ones we worked with so far, so printing all of it is inconvenient. Instead, we can use the `head` or `tail` functions, which return a subset of the *first* or *last* several rows of a `data.frame`, respectively:
+
+```         
+head(rainfall) ##      num altitude sep oct nov dec jan feb mar apr may              name ## 1 110050       30 1.2  33  90 117 135 102  61  20 6.7 Kfar Rosh Hanikra ## 2 110351       35 2.3  34  86 121 144 106  62  23 4.5              Saar ## 3 110502       20 2.7  29  89 131 158 109  62  24 3.8             Evron ## 4 111001       10 2.9  32  91 137 152 113  61  21 4.8       Kfar Masrik ## 5 111650       25 1.0  27  78 128 136 108  59  21 4.7     Kfar Hamakabi ## 6 120202        5 1.5  27  80 127 136  95  49  19 2.7        Haifa Port ##      x_utm   y_utm ## 1 696533.1 3660837 ## 2 697119.1 3656748 ## 3 696509.3 3652434 ## 4 696541.7 3641332 ## 5 697875.3 3630156 ## 6 687006.2 3633330
+```
+
+```         
+tail(rainfall) ##        num altitude sep oct nov dec jan feb mar apr may        name    x_utm ## 164 321800     -180 0.2  12  37  55  65  59  36  11 5.0 Sde Eliyahu 736189.3 ## 165 321850     -220 0.2  13  33  53  64  56  35  11 4.7   Tirat Zvi 737522.4 ## 166 330370     -375 0.1   6  10  20  22  19  11   6 1.3       Kalya 733547.8 ## 167 337000     -390 0.0   5   3  10   7   7   7   3 0.5        Sdom 728245.6 ## 168 345005       80 0.4   2   2   6   5   4   5   2 0.4     Yotveta 700626.3 ## 169 347702       11 0.0   4   2   5   4   3   3   2 1.0       Eilat 689139.3 ##       y_utm ## 164 3591636 ## 165 3590062 ## 166 3515345 ## 167 3435503 ## 168 3307819 ## 169 3270290
+```
+
+We can also check the table *structure* with `str`, as shown previously (Section [4.1.4.2](https://geobgu.xyz/r-2021/tables-conditionals-and-loops.html#data-frame-row-and-column-names)):
+
+```         
+str(rainfall) ## 'data.frame':    169 obs. of  14 variables: ##  $ num     : int  110050 110351 110502 111001 111650 120202 120630 120750 120870 121051 ... ##  $ altitude: int  30 35 20 10 25 5 450 30 210 20 ... ##  $ sep     : num  1.2 2.3 2.7 2.9 1 1.5 1.9 1.6 1.1 1.8 ... ##  $ oct     : int  33 34 29 32 27 27 36 31 32 32 ... ##  $ nov     : int  90 86 89 91 78 80 93 91 93 85 ... ##  $ dec     : int  117 121 131 137 128 127 161 163 147 147 ... ##  $ jan     : int  135 144 158 152 136 136 166 170 147 142 ... ##  $ feb     : int  102 106 109 113 108 95 128 146 109 102 ... ##  $ mar     : int  61 62 62 61 59 49 71 76 61 56 ... ##  $ apr     : int  20 23 24 21 21 19 21 22 16 13 ... ##  $ may     : num  6.7 4.5 3.8 4.8 4.7 2.7 4.9 4.9 4.3 4.5 ... ##  $ name    : chr  "Kfar Rosh Hanikra" "Saar" "Evron" "Kfar Masrik" ... ##  $ x_utm   : num  696533 697119 696509 696542 697875 ... ##  $ y_utm   : num  3660837 3656748 3652434 3641332 3630156 ...
+```
+
+> Create a plot of rainfall in January (`jan`) as function of elevation (`altitude`) based on the `rainfall` table (Figure [4.4](https://geobgu.xyz/r-2021/tables-conditionals-and-loops.html#fig:altitude-rainfall)).
+
+Figure 4.4: Rainfall amount in January as function of elevation
+
+We can get specific information from the table trough subsetting and summarizing. For example, what are the elevations of the lowest and highest stations?
+
+```         
+min(rainfall$altitude) ## [1] -390
+```
+
+```         
+max(rainfall$altitude) ## [1] 955
+```
+
+What are the *names* of the lowest and highest stations?
+
+```         
+rainfall$name[which.min(rainfall$altitude)] ## [1] "Sdom"
+```
+
+```         
+rainfall$name[which.max(rainfall$altitude)] ## [1] "Rosh Tzurim"
+```
+
+> How much rainfall does the `"Haifa University"` station receive in April?
+
+We can create a *new* column using assignment (Section [4.1.6](https://geobgu.xyz/r-2021/tables-conditionals-and-loops.html#creating-new-columns)). For example, here is how we can create a new column named `sep_oct`, with the amounts of rainfall in September and October combined:
+
+```         
+rainfall$sep_oct = rainfall$sep + rainfall$oct
+```
+
+If we want to remove a column, we can assign `NULL` (Section [1.3.5](https://geobgu.xyz/r-2021/the-r-environment.html#special-values)) into it:
+
+```         
+rainfall$sep_oct = NULL
+```
+
+To accomodate more complex calculations, we can also \"build\" a new column inside a `for` loop, going over table rows. For example, the following code section calculates a new column named `annual`, with the total annual precipitation amounts per station:
+
+```         
+m = c("sep", "oct", "nov", "dec", "jan", "feb", "mar", "apr", "may") rainfall$annual = NA for(i in 1:nrow(rainfall)) {   rainfall$annual[i] = sum(rainfall[i, m]) }
+```
+
+Note that the `annual` column is first initialized with `NA` (which is recucled to fill the entire column), then filled with the calculated values when the `for` loop is executed. Inside the code of the `for` loop, note how the `sum` function is applied on a (numeric!) subset of a `data.frame`, treating it the same way as a numeric vector, as in `sum(rainfall[i,m])`.
+
+> Go over the above code and make sure you understand how it works.
+
+> In the above code, we use an index named `m` with month names to subset the rainfall amount columns. Suppose that we want to subset the columns without specifying the month names, instead using the vector of column names that we want to *exlude* `c("num","altitude","name","x_utm","y_utm")`. Which expression can we use instead of `m`, to choose the rainfall amount columns by excluding the irrelevant columns?
+
+The updated `rainfall` table with the new columns is shown below:
+
+```         
+head(rainfall) ##      num altitude sep oct nov dec jan feb mar apr may              name ## 1 110050       30 1.2  33  90 117 135 102  61  20 6.7 Kfar Rosh Hanikra ## 2 110351       35 2.3  34  86 121 144 106  62  23 4.5              Saar ## 3 110502       20 2.7  29  89 131 158 109  62  24 3.8             Evron ## 4 111001       10 2.9  32  91 137 152 113  61  21 4.8       Kfar Masrik ## 5 111650       25 1.0  27  78 128 136 108  59  21 4.7     Kfar Hamakabi ## 6 120202        5 1.5  27  80 127 136  95  49  19 2.7        Haifa Port ##      x_utm   y_utm annual ## 1 696533.1 3660837  565.9 ## 2 697119.1 3656748  582.8 ## 3 696509.3 3652434  608.5 ## 4 696541.7 3641332  614.7 ## 5 697875.3 3630156  562.7 ## 6 687006.2 3633330  537.2
+```
+
+## The `apply` function
+
+In the last example (Section [4.4.3](https://geobgu.xyz/r-2021/tables-conditionals-and-loops.html#example-the-rainfall-csv-structure)), we used a `for` loop to apply a function (`sum`) on each and every one of the rows of a table (`rainfall[, m]`). The `apply` function can replace `for` loops in such situations, and more generally: in situations when we are interested in applying the same function on *all subsets* of certain **dimension** of a `data.frame` (see below), a `matrix` (Section [5.1.8](https://geobgu.xyz/r-2021/matrices-and-rasters.html#summarizing-rows-and-columns)) or an `array` (Section [5.2.3](https://geobgu.xyz/r-2021/matrices-and-rasters.html#using-apply-with-arrays)).
+
+In case of a `data.frame`, there are two dimensions that we can work on with `apply`:
+
+-   *Rows* = Dimension `1`
+
+-   *Columns* = Dimension `2`
+
+Given the dimension of choice, and a function, `apply` *splits* the table into separate rows or columns, *applies* the function, and *combines* the results back into a complete object (Figure [4.5](https://geobgu.xyz/r-2021/tables-conditionals-and-loops.html#fig:apply)). This technique is therefore also known as **split-apply-combine** ([Wickham and others 2011](https://geobgu.xyz/r-2021/references.html#ref-wickham2011)).
+
+Figure 4.5: The `apply` function, applying the `mean` function on columns (left) or rows (right). This figure is from [Murrell](https://geobgu.xyz/r-2021/references.html#ref-murrell2009) ([2009](https://geobgu.xyz/r-2021/references.html#ref-murrell2009)).
+
+The `apply` function needs three arguments:
+
+-   `X`---The *object* we are working on: `data.frame`, `matrix` (Section [5.1.8](https://geobgu.xyz/r-2021/matrices-and-rasters.html#summarizing-rows-and-columns)) or `array` (Section [5.2.3](https://geobgu.xyz/r-2021/matrices-and-rasters.html#using-apply-with-arrays))
+
+-   `MARGIN`---The *dimension* we are working on
+
+-   `FUN`---The *function* applied on that dimension
+
+For example, the `apply` function can be used, instead of a `for` loop, to calculate the total annual rainfall per station. To do that, we apply the `sum` function on the *rows* dimension:
+
+```         
+rainfall$annual = apply(X = rainfall[, m], MARGIN = 1, FUN = sum)
+```
+
+Or, in short:
+
+```         
+rainfall$annual = apply(rainfall[, m], 1, sum)
+```
+
+As another example, we can calculate average monthly rainfall, across all 169 stations, for each month. This time, the `mean` function is applied on the *columns* dimension:
+
+```         
+avg_rain = apply(rainfall[, m], 2, mean)
+```
+
+The result `avg_rain` is a *named* `numeric` vector. Element names correspond to column names of `rainfall[,m]`:
+
+```         
+avg_rain ##        sep        oct        nov        dec        jan        feb        mar  ##   1.025444  21.532544  64.852071 105.798817 123.053254 103.130178  58.366864  ##        apr        may  ##  16.769231   3.968639
+```
+
+For most purposes, such as when applying arithmetic or logical operators, a named vector behaves exactly the same way as an ordinary (unnamed) vector. However, there are some situations where the vector names come into play. For example, we can quickly visualize the values of a named vector using the `barplot` function, which displays the vector names on the x-axis and the vector values on the y-axis (Figure [4.6](https://geobgu.xyz/r-2021/tables-conditionals-and-loops.html#fig:monthly-rainfall-barplot)):
+
+```         
+barplot(avg_rain)
+```
+
+Figure 4.6: Average rainfall per month, among 169 stations in Israel
+
+As another example, let\'s use `apply` to find the station name with the highest rainfall amount, per month. This is a more complicated example, which takes two steps to complete. First, we apply `which.max` on the columns, returning the row indices where the maximal rainfall values are located, per column:
+
+```         
+max_st = apply(rainfall[, m], 2, which.max) max_st ## sep oct nov dec jan feb mar apr may  ##  71  23  77  77  77  66  66  66  77
+```
+
+Second, we obtain the corresponding station names, by subsetting the `name` column using the indices we got in the first step:
+
+```         
+rainfall$name[max_st] ## [1] "Eilon"      "Maabarot"   "Horashim"   "Horashim"   "Horashim"   ## [6] "Golan Farm" "Golan Farm" "Golan Farm" "Horashim"
+```
+
+It is convenient to combine the final result with the month names, into a table, as follows:
+
+```         
+data.frame(   month = m,   name = rainfall$name[max_st] ) ##   month       name ## 1   sep      Eilon ## 2   oct   Maabarot ## 3   nov   Horashim ## 4   dec   Horashim ## 5   jan   Horashim ## 6   feb Golan Farm ## 7   mar Golan Farm ## 8   apr Golan Farm ## 9   may   Horashim
+```
+
+> What do we need to change in the above code sections to get a table of stations where the rainfall amount is *smallest*, per month?
+
+## Table joins
+
+### Joins for classification
+
+In the next example, we are going to work with another table, from a CSV file named `MOD13A3_2000_2019_dates.csv`. The `MOD13A3_2000_2019_dates.csv` table contains the corresponding dates for each *layer* in the raster `MOD13A3_2000_2019.tif`, which contains a monthly time series of NDVI images (Figure [5.13](https://geobgu.xyz/r-2021/matrices-and-rasters.html#fig:dem-raster-plot-multi)). We are going to work with this raster starting from Chapter [5](https://geobgu.xyz/r-2021/matrices-and-rasters.html#matrices-and-rasters).
+
+Let\'s import this new table into R, into a `data.frame` named `dates`:
+
+```         
+dates = read.csv("MOD13A3_2000_2019_dates.csv")
+```
+
+Here is what the first few rows in the `dates` table look like:
+
+```         
+head(dates) ##   layer       date ## 1     1 2000-02-01 ## 2     2 2000-03-01 ## 3     3 2000-04-01 ## 4     4 2000-05-01 ## 5     5 2000-06-01 ## 6     6 2000-07-01
+```
+
+The table has two columns, `layer` and `date`. The `layer` column contains the raster layer indices, from 1 to 233. The `date` column, contains the corresponding dates for raster each layer. The raster layers comprise a *monthly* time series, where the layers contain montly *average* NDVI values. Therefore, all dates in the `dates` table are arbitrarily set to day 1 of the respective month.
+
+Later on in this book, we are going to group the raster layers by *season* (Section [11.3.2](https://geobgu.xyz/r-2021/processing-spatio-temporal-data.html#aggregating-time-periods)), according to the dates. How can we calculate a new `season` column, specifying the season each date in the `dates` table belongs to? Our approach will be composed of two parts. First (see below), we are going to extract the month component of each date. Second (Section [4.6.2](https://geobgu.xyz/r-2021/tables-conditionals-and-loops.html#joining-tables)), we will classify the months into season names, using a table join.
+
+First, we need to figure out the month each date belongs to, which we know how to do from Section [3.1.2](https://geobgu.xyz/r-2021/time-series-and-function-definitions.html#working-with-date-objects). First, we convert to the `date` column to a `Date` vector, using `as.Date` (Section [3.1.2.2](https://geobgu.xyz/r-2021/time-series-and-function-definitions.html#converting-character-to-date)). Then, we extract the month from all dates, using the combination of `as.character` and `as.numeric` (Section [3.1.2.3](https://geobgu.xyz/r-2021/time-series-and-function-definitions.html#converting-date-to-character)):
+
+```         
+dates$date = as.Date(dates$date) dates$month = as.character(dates$date, "%m") dates$month = as.numeric(dates$month)
+```
+
+Now the `dates` table also contains a `month` column:
+
+```         
+head(dates) ##   layer       date month ## 1     1 2000-02-01     2 ## 2     2 2000-03-01     3 ## 3     3 2000-04-01     4 ## 4     4 2000-05-01     5 ## 5     5 2000-06-01     6 ## 6     6 2000-07-01     7
+```
+
+Second, we need to *classify* the months into one of the four seasons, according to the well-known scheme given in Table [4.1](https://geobgu.xyz/r-2021/tables-conditionals-and-loops.html#tab:seasons-months).
+
+|                 |                               |
+|-----------------|-------------------------------|
+|                 | Table 4.1: Months and seasons |
+| **months**      | **season**                    |
+| `12`, `1`, `2`  | `"winter"`                    |
+| `3`, `4`, `5`   | `"spring"`                    |
+| `6`, `7`, `8`   | `"summer"`                    |
+| `9`, `10`, `11` | `"fall"`                      |
+
+The most straightforward way to classify the months into seasons, is through a series of assignment to subset operations (Section [2.3.9](https://geobgu.xyz/r-2021/vectors.html#the-recycling-rule-assignment)). Namely, we can assign each season name into the right *subset* of a new `season` column, depending on the month:
+
+```         
+dates$season = NA dates$season[dates$month %in% c(12, 1:2)] = "winter" dates$season[dates$month %in% 3:5] = "spring" dates$season[dates$month %in% 6:8] = "summer" dates$season[dates$month %in% 9:11] = "fall"
+```
+
+Again, note that we first initialize the column with `NA` values (in the fisst expression), then replace them (in the last four expressions), much like in the last `for` loop example (Section [4.4.3](https://geobgu.xyz/r-2021/tables-conditionals-and-loops.html#example-the-rainfall-csv-structure)).
+
+Here is the result:
+
+```         
+head(dates) ##   layer       date month season ## 1     1 2000-02-01     2 winter ## 2     2 2000-03-01     3 spring ## 3     3 2000-04-01     4 spring ## 4     4 2000-05-01     5 spring ## 5     5 2000-06-01     6 summer ## 6     6 2000-07-01     7 summer
+```
+
+This method of classification may be inconvenient when we have many categories or complex criteria. A more general approach is to use a *table join*, which is what we learn about next (Section [4.6.2](https://geobgu.xyz/r-2021/tables-conditionals-and-loops.html#joining-tables)).
+
+### Joining tables
+
+A table **join** combines rows from two tables into one table, based on identity of values in shared columns. There are several types of joins, such as left, right, inner and full joins, differing in the way that non-matching rows are dealt with (Figure [4.7](https://geobgu.xyz/r-2021/tables-conditionals-and-loops.html#fig:join-types)). In this book, we will just one type of join---known as a **left join**---which is the most useful type of join. In a left join, given two tables `x` and `y`, we get all of the rows of the first table `x`, with the matching row(s), if any, from `y`. In case there is no matching row in `y` for a given row in `x`, the row is still returned, with all values that were supposed to come from `y` set as `NA`. If there are numerous matches, the corresponding row of `x` is duplicated to accomodate all matching values. Matching rows are determined based on identical values in one or more columns that are common both to `x` and `y`.
+
+The `merge` function can do several types of table joins in R. The first two parameters are the tables that need to be joined, `x` and `y`. The third `by` parameter is the common column name(s) by which the tables need to be joined. When employing a left join, we also specify `all.x=TRUE`. The latter setting means that all rows of `x` need to be kept in the resulting table, even if they do not have a match in `y`, which is the definition of a *left join*.
+
+Figure 4.7: A schematic illustration of join types. The circles represent the two tables, the left and right one. The shaded area represents the returned records; for example, a *left join* returns all records from the left table with the matching records from the right table. For more details, see <http://r4ds.had.co.nz/relational-data.html>. This figure is from [Wickham and Grolemund](https://geobgu.xyz/r-2021/references.html#ref-wickham2016r) ([2016](https://geobgu.xyz/r-2021/references.html#ref-wickham2016r)).
+
+As a small example, consider the following small table `dat2`, which contains information about population size of three cities^[15](https://geobgu.xyz/r-2021/tables-conditionals-and-loops.html#fn15)^:
+
+```         
+dat2 = data.frame(   city = c("Beer-Sheva", "Haifa", "Jerusalem", "Tel-Aviv"),   population = c(209687, 285316, 936425, 460613) ) dat2 ##         city population ## 1 Beer-Sheva     209687 ## 2      Haifa     285316 ## 3  Jerusalem     936425 ## 4   Tel-Aviv     460613
+```
+
+Here is the result of a left join between the tables `dat` and `dat2`:
+
+```         
+merge(dat, dat2, by = "city", all.x = TRUE) ##         city                  name lines piano population ## 1 Beer-Sheva     Beer-Sheva Center     4 FALSE     209687 ## 2 Beer-Sheva Beer-Sheva University     5  TRUE     209687 ## 3     Dimona                Dimona     1 FALSE         NA
+```
+
+> What is the difference between the above result and the \"left\" table `dat`? Why was the third value in the `population` column set to `NA`?
+
+Let\'s get back to the `dates` table. The table we are going to join with `dates` is a small table named `tab`, which contains the season classifications of the 12 months. We can prepare the `tab` table as follows:
+
+```         
+month = c(12, 1:11) season = c(rep("winter", 3), rep("spring", 3), rep("summer", 3), rep("fall", 3)) tab = data.frame(month, season) tab ##    month season ## 1     12 winter ## 2      1 winter ## 3      2 winter ## 4      3 spring ## 5      4 spring ## 6      5 spring ## 7      6 summer ## 8      7 summer ## 9      8 summer ## 10     9   fall ## 11    10   fall ## 12    11   fall
+```
+
+Now we can join the `dates` and `tab` tables. Before that, we remove the `season` column we manually created in the previous example:
+
+```         
+dates$season = NULL head(dates) ##   layer       date month ## 1     1 2000-02-01     2 ## 2     2 2000-03-01     3 ## 3     3 2000-04-01     4 ## 4     4 2000-05-01     5 ## 5     5 2000-06-01     6 ## 6     6 2000-07-01     7
+```
+
+Then we use `merge` to join the tables:
+
+```         
+dates = merge(dates, tab, by = "month", all.x = TRUE)
+```
+
+Examing the result shows that the `season` column was indeed joined:
+
+```         
+head(dates) ##   month layer       date season ## 1     1    12 2001-01-01 winter ## 2     1    36 2003-01-01 winter ## 3     1    96 2008-01-01 winter ## 4     1    84 2007-01-01 winter ## 5     1    60 2005-01-01 winter ## 6     1    48 2004-01-01 winter
+```
+
+The joined table was automatically sorted by the common column `month`. It can be sorted back to chronological order using the `order` function (Section [2.4.4](https://geobgu.xyz/r-2021/vectors.html#the-order-function)):
+
+```         
+dates = dates[order(dates$date), ] head(dates) ##     month layer       date season ## 20      2     1 2000-02-01 winter ## 40      3     2 2000-03-01 spring ## 60      4     3 2000-04-01 spring ## 81      5     4 2000-05-01 spring ## 104     6     5 2000-06-01 summer ## 122     7     6 2000-07-01 summer
+```
+
+> Note that that, as a result of the join, the order of the first there columns also changed. How can we get back to the original order of the first three columns?
+
+## Writing tables to file
+
+Often we need to export a `data.frame`, such as the modified `dates` table now with season names (Section [4.6.2](https://geobgu.xyz/r-2021/tables-conditionals-and-loops.html#joining-tables)), to a file. That way, for example, we can import the table in other R code files for further processing, send it to colleagues, import and view it in other software (such as Excel), and so on.
+
+The `write.csv` function can be used to *write* the contents of a `data.frame` to a CSV file (Figure [4.8](https://geobgu.xyz/r-2021/tables-conditionals-and-loops.html#fig:writing-ram-to-storage)). This may be considered as the opposite of `read.csv` (Section [4.4](https://geobgu.xyz/r-2021/tables-conditionals-and-loops.html#reading-tables-from-a-file)). The main two parameters of `read.csv` are:
+
+-   The `data.frame` we want to export
+
+-   The file name, or file path, of the CSV file we want to create
+
+For example, here is how we write the `dates` table into a file named `MOD13A3_2000_2019_dates2.csv` in our working directory:
+
+```         
+write.csv(dates, "MOD13A3_2000_2019_dates2.csv", row.names = FALSE)
+```
+
+Figure 4.8: Writing data from the RAM to long-term storage. This figure is from [Murrell](https://geobgu.xyz/r-2021/references.html#ref-murrell2009) ([2009](https://geobgu.xyz/r-2021/references.html#ref-murrell2009)).
+
+The additional `row.names` parameter determines whether the row names are saved. As mentioned above (Section [4.1.4](https://geobgu.xyz/r-2021/tables-conditionals-and-loops.html#data-frame-properties)), `data.frame` row names are usually meaningless, in which case there is no reason to save them in the CSV file.
+
+Like in `read.csv`, we can either give a full file *path* or just the *file name*. If we specify just the file name, such as in the above example, the file is written to the working directory.

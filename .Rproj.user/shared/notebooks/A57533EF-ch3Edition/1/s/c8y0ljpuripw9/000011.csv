@@ -1,0 +1,7 @@
+"0","#| echo: false"
+"0","#| label: tbl-tab23"
+"0","#| tbl-cap: The time fishers departed for fishing with the distance to th fishing ground"
+"0",""
+"0","fishing.dep |>"
+"0","  tidyr::separate(departure.time, into = c(""date"", ""time""), sep = "" "") |>"
+"0","  gt::gt()"

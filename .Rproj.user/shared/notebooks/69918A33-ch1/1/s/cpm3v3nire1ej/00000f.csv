@@ -1,0 +1,5 @@
+"0","#| echo: false"
+"0","#| label: fig-rstudio-console"
+"0","#| fig-cap: RStudio console"
+"0",""
+"0","knitr::include_graphics(""graphics/preface/rstudio_console.png"")"

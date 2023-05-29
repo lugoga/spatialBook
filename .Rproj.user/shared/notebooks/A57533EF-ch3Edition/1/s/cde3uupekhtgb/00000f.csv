@@ -1,0 +1,4 @@
+"0",""
+"0","fishing.dep = data.frame(vessel.id, "
+"0","                     departure.time, "
+"0","                     distance.ground)"

@@ -1,0 +1,6 @@
+"0","my.colors = colorRampPalette(c(""#5E85B8"",""#EDF0C0"",""#C13127""))"
+"0",""
+"0",""
+"0","my.colors2 = colorRampPalette(colors = c(""#8220EF"", ""#000096"", ""#0000CC"", ""#446CEA"", ""#1F90FF"", ""#00BFFA"","
+"0","                            ""#9FD2FE"", ""#D3F5FF"", ""#FFFFC7"", ""#FFAA01"", ""#FF6E01"", ""#FE0000"", ""#C80000"", ""#9F2323""))"
+"0",""

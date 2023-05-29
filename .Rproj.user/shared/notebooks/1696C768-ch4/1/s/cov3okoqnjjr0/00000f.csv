@@ -1,0 +1,3 @@
+"0","ctd %>% group_by(station) %>%"
+"0","  summarise(Mean = mean(fluorescence, na.rm = TRUE),"
+"0","           STD = sd(fluorescence, na.rm = TRUE))"

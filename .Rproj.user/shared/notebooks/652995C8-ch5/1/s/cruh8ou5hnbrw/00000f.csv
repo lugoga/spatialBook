@@ -1,0 +1,2 @@
+"0","bathy.aoi = bathy %>% "
+"0","  terra::crop(crop_extent)"

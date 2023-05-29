@@ -1,0 +1,595 @@
+# Data types and data frame
+
+Before the beginning of data collection, it should be clearly defined which type of data one wants to collect. It may be operational data, biological data, economic data or socio-cultural data. Each data type may be used for a variety of indicators. Catch, for instance, may be used both in calculations of revenue for economic purposes and as a rough measure of resource depletion. The length frequency data of the catch can be collected for determining the healthy of the stock. The selection of a data type also depends on the available analyses. 
+
+There are several kind of data and require different kinds of statistical methods. For *quantitative* data we create boxplots and compute means, but for *qualitative* data we don’t. Instead we produce bar charts and summarise the data in tables either in percentage or proportion. We can summarize qualitative data by counting the number of observations in each category or by computing the proportion of the observations in each category. However, even when the qualitative data are identified by a numerical code, arithmetic operations such as addition, subtraction, multiplication, and division do not provide meaningful results. Arithmetic operations provide meaningful results for quantitative variables.
+
+In R, a variable describes what kind of object is assigned to it. We can assign many different types of objects to the variable. It may for instance contain a `number`, `text`, `date`. In order to treat a correctly, R needs to know what data type its assigned object has. In some programming languages, you have to explicitly state what data type a variable has, but not in R. This makes programming in R simpler and faster, but can cause problems if a variable turns out to have a different data type than what you thought. The common six data types are highlighted in @fig-datatypes;
+
+```{r}
+#| label: fig-datatypes
+#| fig-cap: Common data types often collected and stored for anaysis and modelling 
+#| fig-pos: H
+#| echo: false
+#| out-width: "100%"
+
+knitr::include_graphics("graphics/chp3E/DATATYPES-01.png")
+```
+
+
+For most people, it suffices to know about the first three in the list below:
+
+1. *numeric*: numbers like 1 and 16.823 (sometimes also called double);
+1. *logical*: true/false values (boolean): either TRUE or FALSE;
+1. *character*: text, e.g. "a", "Indian Ocean." and "FAO";
+1. *integer*: integer numbers, denoted in R by the letter L: 1L, 55L;
+1. *complex*: complex numbers, like 2+3i. Rarely used in statistical work.
+1. *date*: date like 2022-12-15
+
+In addition, these can be combined into special data types sometimes called data structures, examples of which include `vectors` and `data frames`. Important data structures include factor, which is used to store categorical data, and the awkwardly named POSIXct which is used to store date and time data.
+
+### Vectors
+Often times we want to store a set of numbers in once place. One way to do this is using the vectors in R. Vector is the most basic data structure in R. It is a sequence of elements of the same data type. if the elements are of different data types, they be coerced to a common type that can accommodate all the elements. Vector are generally created using the `c()` function widely called `concatenate`, though depending on the type vector being created, other method. Vectors store several numbers-- a set of numbers in one container. let us look on the example below
+
+```{r}
+id = c(1,2,3,4,5)
+mean.tl = c(158,659,782,659,759)
+country = c("Somalia", "Kenya", "Mauritius", "Seychelles",  "Mozambique")
+```
+
+Notice that the `c()` function, which is short for concatenate wraps the list of numbers. The `c()` function combines all numbers together into one container. Notice also that all the individual numbers are separated with a comma. The comma is referred to an an item-delimiter. It allows R to hold each of the numbers separately. This is vital as without the item-delimiter, R will treat a vector as one big, unseperated number.
+
+#### Numeric vector
+
+The most common data type in R is numeric. The numeric class holds the set of real numbers --- decimal place numbers. We create a numeric vector using a `c()` function but you can use any function that creates a sequence of numbers.  For example, we can create a numeric vector of SST as follows;
+
+```{r}
+sst = c(25.4, 26, 28, 27.8, 29, 24.8, 22.3)
+```
+
+We can check whether the variable sst is numeric with `is.numeric` function
+```{r}
+is.numeric(sst)
+```
+
+
+#### Integer vector
+
+Integer vector data type is actually a special case of numeric data. Unlike `numeric`, `integer` values do not have decimal places.They are commonly used for counting or indexing.  Creating an integer vector is similar to numeric vector except that we need to instruct R to treat the data as integer and not numeric or double. To command R creating integer, we specify a suffix `L` to an element
+
+```{r}
+depth = c(5L, 10L, 15L, 20L, 25L,30L)
+is.vector(depth);class(depth)
+```
+
+
+::: callout-note
+if your variable does not have decimals, R will automatically set the type as integers instead of numeric.
+:::
+
+
+```{r}
+aa = c(20,68,78,50)
+```
+
+You can check if the data is integer with `is.integer()` and can convert numeric value to an integer with `as.integer()` 
+
+```{r}
+is.integer(aa)
+
+```
+
+You can query the class of the object with the `class()` to know the class of the object
+```{r}
+class(aa)
+
+```
+
+Although the object bb is integer as confirmed with `as.integer()` function, the `class()` ouput the answer as numeric. This is because the defaul type of number in r is numeric. However, you can use the function `as.integer()` to convert numeric value to integer
+
+```{r}
+class(as.integer(aa))
+```
+
+
+#### Character vector
+In programming terms, we usually call text as *string*. This often are `text` data like names. A character vector may contain a single character , a word or a group of words. The elements must be enclosed with a single or double quotations mark.
+
+```{r}
+sites = c("Pemba Channel", "Zanzibar Channnel", "Pemba Channel")
+is.vector(sites); class(sites)
+```
+
+We can be sure whether the object is a string with `is.character()` or check the class of the object with `class()`.
+
+```{r}
+countries = c("Kenya", "Uganda", "Rwanda", "Tanzania")
+class(countries)
+```
+
+
+::: callout-note   
+Everything inside `""` will be considered as character, no matter if it looks like character or not
+:::
+
+
+#### Factor
+
+Factor variables are a special case of character variables in the sense that it also contains text. However, factor variables are used when there are a limited number of unique character strings. It often represents a categorical variable. For instance, the gender will usually take on only two values, \"female\" or \"male\" (and will be considered as a factor variable) whereas the name will generally have lots of possibilities (and thus will be considered as a character variable). To create a factor variable use the `factor()` function:
+```{r}
+    maturity.stage <- factor(c("I", "II", "III", "IV", "V"))
+    maturity.stage
+```
+
+
+To know the different levels of a factor variable, use `levels()`:
+
+```{r}
+ levels(maturity.stage)
+```
+  
+   
+By default, the levels are sorted alphabetically. You can reorder the levels with the argument `levels` in the `factor()` function:
+
+```{r}
+mature <- factor(maturity.stage, levels = c("V", "III"))
+    levels(mature)
+```
+  
+
+Character strings can be converted to factors with `as.factor()`:
+
+```{r}
+ text <- c("test1", "test2", "test1", "test1") # create a character vector
+    class(text) # to know the class
+```
+   
+```{r}
+ text_factor <- as.factor(text) # transform to factor
+    class(text_factor) # recheck the class
+```
+
+   
+The character strings have been transformed to factors, as shown by its class of the type `factor`.
+
+
+Often we wish to take a continuous numerical vector and transform it into a factor. The function `cut()` takes a vector of numerical data and creates a factor based on your give cut-points. Let us make a fictional total length of 508 bigeye tuna with `rnorm()` function. 
+
+```{r, fig.width=3, fig.height=2}
+#| label: fig-hist
+#| fig-cap: Normal distribution of bigeye tuna's tota length
+#| fig-pos: H
+#| fig-width: 5
+#| fig-height: 4
+#| warning: false
+#| message: false
+#| comment: ""
+
+## Simulate data for plotting
+tl.cm = rnorm(n = 508, mean = 40, sd = 18)
+
+tl.cm |>
+  tibble::as.tibble() |>
+  ggstatsplot::gghistostats(x = value, binwidth = 10, test.value = 40.2, type = "n", normal.curve = T, centrality.type = "p", xlab = "Total length (cm)")
+```
+
+We can now breaks the distribution into groups and make a simple plot as shown in @fig-lfq, where frequency of bigeye tuna color coded with the group size
+
+```{r}
+
+group = cut(tl.cm, breaks = c(0,30,60,110),
+            labels = c("Below 20", "30-60", "Above 60"))
+is.factor(group)
+levels(group)
+```
+
+
+```{r}
+#| label: fig-bar
+#| fig-pos: H
+#| fig-cap: Length frequency of bigeye tuna
+#| fig-width: 6
+#| fig-height: 4
+
+barplot(table(group), las = 1, horiz = FALSE, col = c("blue", "green", "red"), ylab = "Frequency", xlab = "")
+```
+
+
+#### Logical
+Logical data (or simply logical ) represent the logical `TRUE` state and the logical `FALSE` state. Logical variables are the variables in which logical data are stored. Logical variables can assume only two states:
+
++ FALSE, always represent by 0;
++ TRUE, always represented by a nonzero object. Usually, the digit 1 is used for TRUE. 
+
+We can create logical variables indirectly, through logical operations, such as the result of a comparison between two numbers. These operations return logical values. For example, type the following statement at the R console: 
+
+
+```{r}
+5 > 3;
+5 < 3
+```
+
+Since 5 is indeed greater than 3, the result of the comparison is true, however, 5 is not less than 3, and hence the comparison is false. The sign `>` and `<` are relational operators, returning logical data types as a result. 
+
+
+
+```{r}
+ value1 <- 7
+    value2 <- 9
+```
+   
+```{r}
+    greater <- value1 > value2
+    greater
+    class(greater)
+
+```
+
+ 
+```{r}
+    # is value1 less than or equal to value2?
+    less <- value1 <= value2
+    less
+    class(less)
+
+```
+
+
+It is also possible to transform logical data into numeric data. After the transformation from logical to numeric with the `as.numeric()` command, `FALSE` values equal to 0 and `TRUE` values equal to 1:
+
+```{r}
+ greater_num <- as.numeric(greater)
+    sum(greater)
+```
+   
+```{r}
+   less_num <- as.numeric(less)
+    sum(less)
+```
+
+
+Conversely, numeric data can be converted to logical data, with `FALSE` for all values equal to 0 and `TRUE` for all other values.
+
+```{r}
+  x <- 0
+  as.logical(x)
+```
+
+
+```{r}
+ y <- 5
+as.logical(y)
+```
+
+3## Date and Time
+
+Date and time are also treated as vector in R
+
+```{r}
+date.time = seq(lubridate::dmy(010121), 
+                lubridate::dmy(250121), 
+                length.out = 5)
+date.time
+```
+
+
+#### Generating sequence of vectors Numbers
+
+There are few R operators that are designed for creating vecor of non-random numbers. These functions provide multiple ways for generating sequences of numbers
+
+The colon `:` operator, explicitly generate regular sequence of numbers between the lower and upper boundary numbers specified. For example, generating number beween 0 and 10, we simply write;
+
+```{r}
+vector.seq = 0:10
+vector.seq
+```
+
+However, if you want to generate a vector of sequence number with specified interval, let say we want to generate number between 0 and 10 with interval of 2, then the `seq()` function is used
+```{r}
+regular.vector = seq(from = 0,to = 10, by = 2)
+regular.vector
+```
+
+unlike the `seq()` function and `:` operator that works with numbers, the `rep()` function generate sequence of repeated numbers or strings to create a vector
+
+```{r}
+id = rep(x = 3, each = 4)
+station = rep(x = "Station1", each = 4)
+id;station
+```
+
+The `rep()` function allows to parse `each` and `times` arguments. The `each` argument allows creation of vector that that repeat each element in a vector according to specified number. 
+```{r}
+sampled.months = c("January", "March", "May")
+rep(x = sampled.months, each = 3)
+
+```
+
+But the `times` argument repeat the whole vector to specfied times
+```{r}
+rep(x = sampled.months, times = 3)
+```
+
+#### Generating vector of normal distribution
+
+The central limit theorem that ensure the data is normal distributed is well known to statistician. R has a `rnorm()` function which makes vector of normal distributed values. For example to generate a vector of 40 sea surface temperature values from a normal distribution with a `mean` of 25, and `standard deviation` of 1.58, we simply type this expression in console;
+```{r}
+sst = rnorm(n = 40, mean = 25,sd = 1.58)
+sst
+```
+
+#### Rounding off numbers
+There are many ways of rounding off numerical number to the nearest integers or specify the number of decimal places. the code block below illustrate the common way to round off:
+
+```{r}
+chl = rnorm(n = 20, mean = .55, sd = .2)
+chl |> round(digits = 2)
+```
+
+
+#### Number of elements in a vector
+Sometimes you may have a long vector and want to know the numbers of elements in the object. R has `length()` function that allows you to query the vector and print the answer
+
+```{r}
+length(chl)
+```
+
+
+### Data Frame
+The basis for most data analyses in R are data frames -- spreadsheet-like tables.  data frame is the primary structures for storing data in R. Data frames are made up of rows and columns. The top row is a header and describes the contents of each variable. Each row represents an individual measured or observed record. Records can also have names. Each record contains multiple cells of values. The unique of data frame is the capability to different types of data - as you’d expect, the different types of objects have different properties and can be used with different functions. Here’s the run-down of four common types:
+
+1. *matrix*: a table where all columns must contain objects of the same type (e.g. all numeric or all character). Uses less memory than other types and allows for much faster computations, but is difficult to use for certain types of data manipulation, plotting and analyses.
+
+1. *data.frame*: the most common type, where different columns can contain different types (e.g. one numeric column, one character column).
+1. *data.table*: an enhanced version of data.frame.
+1. *tibble*: another enhanced version of data.frame.
+
+
+Let’s illustrates data frame using historical catch data in the Western Indian Ocean Region from FAO. This dataset  is called `landings_wio_country.csv` and contains some data about total landed catches of ten countries in the WIO region reported in FAO between 1951 and 2015.
+
+```{r}
+#| warning: false
+#| message: false
+#| echo: false
+
+
+readr::read_csv("data/tidy/landings_wio_country.csv", skip = 4) |> 
+  dplyr::filter(year == 2015)|>
+  dplyr::select(country=name, year, catch) 
+
+
+```
+
+Notice that  data frame follow the same structure: each column represents a variable (e.g. country, year, catch) and each row represents an record (e.g. an individual). This is the standard way to store data in R (as well as the standard format in statistics in general). In what follows, we will use the terms column and variable interchangeably, to describe the columns/variables in a data frame. That is imported data, but R allows us to create data frames and add attributes to data frames. Perhaps the easiest way to create a data frame is to parse vectors in a `data.frame()` function. For instance, in this case we create a simple data frame `dt` and assess its internal structure
+
+```{r}
+# create vectors
+country  = c('Kenya','Mozambique','Seychelles')
+weight = c(90, 75, 92)
+maturity = c("I", "II", "V")
+
+## use the vectors to make a data frame
+dt = data.frame(country, weight, maturity)
+
+## assess the internal structure
+str(dt)
+```
+
+Note how Variable `Name` in dt was converted to a column of factors . This is because there is a default setting in `data.frame()` that converts character columns to factors . We can turn this off by setting the `stringsAsFactors = FALSE` argument:
+
+```{r}
+## use the vectors to make a data frame
+df = data.frame(country, weight, maturity, stringsAsFactors = FALSE)
+df |> str()
+```
+
+Now the variable `Name` is of character class in the data frame. The inherited problem of data frame to convert character columns into a factor is resolved by introduction f advanced data frames called *tibble* [@tibble], which provides sticker checking and better formating than the traditional data.frame.
+
+```{r}
+## use the vectors to make a tibble
+tb = tibble::tibble(country, weight, maturity) 
+## check the internal structure of the tibble
+tb |> dplyr::glimpse()
+```
+
+@tbl-score show the the data frame created by fusing the two vectors together.
+
+```{r tab301, echo=FALSE}
+#| label: tbl-score
+#| tbl-cap: Variables in the data frame
+
+tb |>
+  gt::gt()
+
+```
+
+Because the columns have meaning and we have given them column names, it is desirable to want to access an element by the name of the column as opposed to the column number.In large Excel spreadsheets I often get annoyed trying to remember which column something was. The `$`sign and `[]`are used in R to select variable from the data frame.
+
+```{r}
+dt$country
+dt[,1]
+```
+
+```{r}
+dt$weight
+dt[,2]
+```
+
+The FSA package in R has build in dataset that we can use for illustration. For example, `ChinookArg` dataset  contains total length and weight of 112 Chinook salmon collected in three sites in Argentina.  (@tbl-chinook). 
+
+```{r}
+#| label: tbl-chinook
+#| tbl-cap: Longleys' Economic dataset
+
+chinook = FSA::ChinookArg
+
+
+
+chinook |>
+  dplyr::sample_n(size = 12) |>
+  gt::gt()
+
+
+```
+
+Sometimes you may need to create set of values and store them in vectors, then combine the vectors into a data frame. Let us see how this can be done. First create three vectors. One contains id for ten individuals, the second vector hold the time each individual signed in the attendane book and the third vector is the distance of each individual from office. We can concatenate the set of values to make vectors.
+
+```{r}
+vessel.id  = c(1,2,3,4,5,6,7,8,9,10)
+
+departure.time = lubridate::ymd_hms(c("2018-11-20 06:35:25 EAT", "2018-11-20 06:52:05 EAT", 
+                 "2018-11-20 07:08:45 EAT", "2018-11-20 07:25:25 EAT", 
+                 "2018-11-20 07:42:05 EAT", "2018-11-20 07:58:45 EAT", 
+                 "2018-11-20 08:15:25 EAT", "2018-11-20 08:32:05 EAT", 
+                 "2018-11-20 08:48:45 EAT", "2018-11-20 09:05:25 EAT"), tz = "")
+
+distance.ground = c(20, 85, 45, 69, 42,  52, 6, 45, 36, 7)
+```
+
+Once we have the vectors that have the same length dimension, we can use the function `data.frame()` to combine the the three vectors into one data frame shown in @tbl-tab23
+
+```{r}
+
+fishing.dep = data.frame(vessel.id, 
+                     departure.time, 
+                     distance.ground)
+```
+
+```{r}
+#| echo: false
+#| label: tbl-tab23
+#| tbl-cap: The time fishers departed for fishing with the distance to th fishing ground
+
+fishing.dep |>
+  tidyr::separate(departure.time, into = c("date", "time"), sep = " ") |>
+  gt::gt()
+
+```
+
+## Importing Data
+So far, we’ve looked at several dataset in previous chapter and we have also created ourselves some datasets. While you can do all your data entry work in R or Excel, it is much more common to load data from other sources. Local and international organization have been collecting fisheries dependent and fisheries independent data for years. These historical dataset with fisheries information like fish catch, effort, landing sites, fishing ground and critical habitats can be obtained from several databases---some are open and other closed. Much of the data we download or receive from is either comma-separated value files `.csv` or and Excel spreadsheets, `.xlsx.` .csv files are spreadsheets stored as text files - basically Excel files stripped down to the bare minimum - no formatting, no formulas, no macros. You can open and edit them in spreadsheet software like LibreOffice Calc, Google Sheets or Microsoft Excel. Many devices and databases can export data in .csv format, making it a commonly used file format that you are likely to encounter sooner rather than later. 
+
+Whether that be a comma separated (csv) or a tab delimited file, there are multiple functions that can read these data into R. We will stick to loading these data from the **tidyverse** packages but be aware these are not the only methods for doing this. We will use the tidyverse functions just to maintain consistency with everything else we do. The first package in **tidyverse** we will use is called **readr** [@readr], which is a collection of functions to load the tabular data from working directory in our machine into R session. Some of its functions include:
+
++ `read_csv()`: comma separated (CSV) files
++ `read_tsv()`: tab separated files
++ `read_delim()`: general delimited files
++ `read_fwf()`: fixed width files
++ `read_table()`: tabular files where columns are separated by white-space.
++ `read_log()`: web log files
++ **readxl** reads in Excel files.
+
+Before we import the data, we need to load the packages that we will use their functions in this chapter
+
+```{r}
+#| warning: false
+#| message: false
+
+require(tidyverse)
+require(magrittr)
+```
+
+
+### Importing csv files
+
+A `CSV` file is a type of file where each line contains a single record, and all the columns are separated from each other via a comma. In order to load data from a file into R, you need its path - that is, you need to tell R where to find the file. Unless you specify otherwise, R will look for files in its current working directory. You can read `.csv` file using `read_csv()` function of the **readr** package [@readr] as shown in the chunk below;
+
+
+
+```{r}
+#| eval: false
+imported.lfq = read_csv("dataset/project/tidy_LFQ_sample_4.csv")
+
+lf4
+```
+
+We imported `tidy_LFQ_sample_4.csv` from working directory into R using `read_csv()` and specify the path to the file in your working directory and store as `imported.lfq. If you get an error message, it means that `tidy_LFQ_sample_4.csv` is not in your working directory. Either move the file to the right directory (remember, you can use run `getwd()` to see what your working directory is) or change your working directory.
+
+```{r}
+#| warning: false
+#| message: false
+#| comment: ""
+#| 
+imported.lfq = read_csv("data/tidy/tidy_LFQ_sample_4.csv")
+
+
+```
+If you glimpse the dataframe with `glimpse()` function, you should see the internal structure of the `imported.lfq` object we just loaded;
+
+```{r}
+imported.lfq %>% 
+  glimpse()
+```
+
+The dataset contains six variables and 6,185 records. The variables `site` and `sex` both contain text, and have been imported as character vectors4. The `date` column has been imported as date format, the variable `tl_mm` and `fl_mm` are measured length and have been imported as numeric vector measured in millimeters. The variable `wt_gm` is the weight of fish measured in grams and also have been imported as numeric vector. 
+
+
+So, what can you do in case you need to import data from a file that is not in your working directory? This is a common problem, as many of us store script files and data files in separate folders (or even on separate drives). One option is to use `file.choose`, which opens a pop-up window that lets you choose which file to open using a graphical interface:
+
+```r
+imported.lfq2 = read_csv(file.choose())
+```
+
+This solution work just fine if you just want to open a single file once. But if you want to reuse your code or run it multiple times, you probably don’t want to have to click and select your file each time. Instead, you can specify the path to your file in the call to `read_csv`.
+
+
+### Importing Excel files
+
+Commonly our data is stored as a Excel file. There are several packages that can be used to import Excel files to R. I prefer the **readxl** package [@readxl], so let’s install that:
+
+```r
+install.packages("readxl")
+```
+The package has `read_exel()` function that allows us to specify which sheet within the Excel file to read. The  function automatically convert the worksheet into a `.csv` file and read it. Let's us import the the data in first sheet of the `tidy_LFQ_sample_4.xlsx`. Is a similar dataset that just imported in the previous section, but is in Excel format.  We will use this file to illustrate how to import the excel file into R workspace with `readxl` package [@readxl].
+
+
+```{r}
+#| warning: false
+#| message: false
+#| comment: ""
+imported.lfq = readxl::read_excel("data/tidy/tidy_LFQ_sample_4.xlsx", sheet = 1)
+
+```
+
+
+
+```{r}
+#| warning: false
+#| message: false
+#| comment: ""
+imported.lfq
+
+```
+
+```{r}
+imported.lfq %>% 
+  skimr::skim()
+```
+
+
+## Saving and exporting your data
+In many a case, data manipulation is a huge part of statistical work, and of course you want to be able to save a data frame after manipulating it. There are two options for doing this in R - you can either export the data as e.g. a .csv or a .xlsx file, or save it in R format as an .RData file.
+
+### Exporting data
+Just as we used the functions `read_csv` and `read_excel` to import data, we can use `write_csv`to export it. The code below saves the bookstore data frame as a .csv file file, which will be created in the current working directory. If you wish to store 
+
+
+```r
+
+imported.lfq %>%  write_csv("assets/fao_paul_dataset/tidy/tidy_lfq.csv")
+
+```
+
+### Saving and loading R data
+Being able to export to different spreadsheet formats is very useful, but sometimes you want to save an object that can’t be saved in a spreadsheet format. For instance, you may wish to save a multiple processed data, functions and formula that you’ve created. `.RData` files can be used to store one or more R objects. To save the objects bookstore and age in a `.Rdata` file, we can use the save function:
+
+
+
+```r
+
+save.image("assets/fao_paul_dataset/tidy/myData.RData")
+
+```
+
+
+

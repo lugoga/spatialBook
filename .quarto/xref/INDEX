@@ -1,0 +1,62 @@
+{
+  "index.qmd": {
+    "index.html": "3d7abd3a"
+  },
+  "intro.qmd": {
+    "intro.html": "06e86a8c"
+  },
+  "summary.qmd": {
+    "summary.html": "029a932c"
+  },
+  "references.qmd": {
+    "references.html": "4c7c4c04"
+  },
+  "ch1.qmd": {
+    "ch1.html": "716aff4e"
+  },
+  "ch2.qmd": {
+    "ch2.html": "398ed2d6"
+  },
+  "ch3.qmd": {
+    "ch3.html": "f04d43af"
+  },
+  "ch4.qmd": {
+    "ch4.html": "6f0bda56"
+  },
+  "ch5.qmd": {
+    "ch5.html": "aebe3297"
+  },
+  "ch6.qmd": {
+    "ch6.html": "368dc3ea"
+  },
+  "ch7.qmd": {
+    "ch7.html": "83d7d916"
+  },
+  "ch8.qmd": {
+    "ch8.html": "2acd4689"
+  },
+  "ch9.qmd": {
+    "ch9.html": "a0ee8919"
+  },
+  "ch10.qmd": {
+    "ch10.html": "5df37540"
+  },
+  "ch11.qmd": {
+    "ch11.html": "4ce95bab"
+  },
+  "ch12.qmd": {
+    "ch12.html": "e10b73e3"
+  },
+  "ch13.qmd": {
+    "ch13.html": "410ce9bb"
+  },
+  "ch3Edition.qmd": {
+    "ch3Edition.html": "27f88560"
+  },
+  "ch0.qmd": {
+    "ch0.html": "6e4d3836"
+  },
+  "ch41.qmd": {
+    "ch41.html": "7e179bd3"
+  }
+}

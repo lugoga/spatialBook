@@ -1,0 +1,6 @@
+"0",""
+"0","my.rast <- rast("
+"0","  xmin = -180, ymin = -90, xmax = 180, ymax = 90, "
+"0","  nrow = 180, "
+"0","  ncol = 360, "
+"0","  crs = ""+proj=longlat +datum=WGS84"")"

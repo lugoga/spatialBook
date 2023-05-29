@@ -1,0 +1,5 @@
+"0","my.values = rnorm("
+"0","  n = my.rast |> ncell(), "
+"0","  mean = 25, "
+"0","  sd = 1.8"
+"0","  )"

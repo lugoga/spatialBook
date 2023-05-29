@@ -1,0 +1,3 @@
+"0","ctd %>% "
+"0","  select(pressure, fluorescence) %>%"
+"0","  mutate(anomaly = fluorescence - mean(fluorescence, na.rm = TRUE))"

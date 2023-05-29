@@ -1,0 +1,7 @@
+"0","#| label: fig-datatypes"
+"0","#| fig-cap: Common data types often collected and stored for anaysis and modelling "
+"0","#| fig-pos: H"
+"0","#| echo: false"
+"0","#| out-width: ""100%"""
+"0",""
+"0","knitr::include_graphics(""graphics/chp3E/DATATYPES-01.png"")"

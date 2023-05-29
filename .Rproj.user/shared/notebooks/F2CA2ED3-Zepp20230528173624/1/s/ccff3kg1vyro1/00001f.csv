@@ -1,0 +1,10 @@
+"0","aa %>% 
+  select(geometry) %>% 
+  st_cast(""POLYGON"")%>%
+  st_make_valid() %>% 
+  st_is_valid()
+"
+"1","[1]"
+"1"," FALSE"
+"1","
+"

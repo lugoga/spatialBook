@@ -1,0 +1,64 @@
+# Handling dates using {lubridate}
+
+The {lubridate} package provides a range of functions that simplify common tasks. {lubridate} makes working with dates and times more intuitive and less error-prone, allowing users to focus on their analysis rather than the difficulties of date manipulation.
+
+The {lubridate} package provides:
+
+-   User-friendly syntax: consistent and intuitive syntax which makes it easier to understand and write code for date operations.
+
+-   Comprehensive functionality: Offers a range of built in functions for common date operations. It allows us to parse dates from different formats and extract information such as year, month and day. This functionality saves time and effort compared to your manual calculations in Excel.
+
+-   Date representation: {lubridate} ensures consistent date representation by using the POSIXct class, which stores dates as numbers of seconds since 1 January 1970.
+
+
+
+```{r}
+library("lubridate")
+```
+
+
+### Converting dates:
+
+In Excel, to convert a string into a date format, you can use the `DATEVALUE()` function. For example, if your date is in cell `A2`, you can use `=DATEVALUE(A2)` to convert it into a date format. In R, you can use the `as_date()` function to convert a string into a date format. For example, if your date is `"2023-01-18"`, you can use `as_date("2023-01-18")`.
+
+#### R
+
+In R, when running the class function on `as_date("2023-01-18")`, it returns the class or data type of the object. In this case, it would return \"Date\" since `as-date("2023-01-18")` converts the given string into a date object.
+
+```{r}
+class(2023-05-16)
+
+```
+
+```{r}
+{lubridate::as_date("2023-01-18")}
+class(lubridate::as_date("2023-01-18"))
+```
+## Calculating time intervals:
+In Excel, you can use the DATEDIF() function to calculate the time difference between two dates in various units (years, months, etc.). For example, if you want to calculate the number of days between two dates in cells A2 and B2, you can use = DATEDIF(A2,B2,"d"). In R, using {lubridate}, you can calculate the difference in dates using the interval() function. Let’s calculate the difference between the two dates specified (January 18, 2023 and May 16, 2023) in terms of days.
+
+The following code  take the start date and end date and calculating the difference. We then convert the difference to days using as.numeric().
+
+```{r}
+start_date = as_date("2023-01-18")
+end_date = as_date("2023-05-16")
+
+diff_date = interval(start_date, end_date) |>
+  as.duration() |>
+  as.numeric(unit = "days")
+
+diff_date
+```
+
+## Formatting dates:
+Dates in Excel can be formatted using the Format Cells feature. For example, you can format a date as dd-mmm-yyyy to display it as "16-May-2023". In R, you can use the format() function to format a date in various ways.
+
+```{r}
+date = lubridate::as_date("2023-05-16")
+date_formatted = format(date, "%d-%b-%Y")
+date_formatted
+```
+
+## The Movies Data
+Let’s dive into more advanced examples of working with dates in R and Excel. In our previous blog series comparing Excel and R, we utilised a dataset called “movies data” which consists of five columns: country, year, highest movie profit, number of movies produced, and number of employees involved in the production. We’ve added two new columns to our dataset called start_date and end_date.
+

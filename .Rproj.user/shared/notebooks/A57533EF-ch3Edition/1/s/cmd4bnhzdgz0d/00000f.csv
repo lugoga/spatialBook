@@ -1,0 +1,5 @@
+"0","#| warning: false"
+"0","#| message: false"
+"0","#| comment: """""
+"0","imported.lfq = readxl::read_excel(""data/tidy/tidy_LFQ_sample_4.xlsx"", sheet = 1)"
+"0",""

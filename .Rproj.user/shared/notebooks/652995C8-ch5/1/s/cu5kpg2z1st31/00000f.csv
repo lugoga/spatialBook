@@ -1,0 +1,15 @@
+"0","require(tidyverse)"
+"0","require(terra)"
+"0","require(tidyterra)"
+"0","require(patchwork)"
+"2","载入需要的程辑包：patchwork
+"
+"2","
+载入程辑包：‘patchwork’
+
+"
+"2","The following object is masked from ‘package:terra’:
+
+    area
+
+"

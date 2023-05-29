@@ -1,0 +1,289 @@
+# Raster processing
+
+In this chapter, our main objectives revolve around efficient data manipulation and analysis of raster data. We aim to equip ourselves with the necessary skills to achieve these goals through the utilization of two key R packages: `terra` and `tidyterra`.
+
+Firstly, we will delve into the process of extracting subsets from raster data. This involves learning techniques to isolate specific regions or areas of interest within a raster dataset, allowing us to focus our analysis on relevant portions.
+
+Next, we will explore the manipulation of raster dimension properties. This encompasses setting and modifying attributes related to the dimensions of the raster, such as resolution, extent, and coordinate reference system. Understanding and controlling these properties are crucial for accurate analysis and integration with other spatial datasets.
+
+Lastly, we will dive into raster algebra, a powerful tool for generating new rasters based on mathematical operations involving one or more existing rasters. This approach enables us to perform complex calculations, such as combining multiple layers or applying mathematical transformations, to derive valuable insights from the data.
+
+## glimpse of raster
+
+A a raster is a fundamental spatial data structure used to represent and store geographic information. It divides a region into a grid of rectangular cells, also known as pixels. Each cell within the raster can hold one or more values, allowing for the storage of various types of information, such as elevation, temperature, land cover, or satellite imagery.
+
+This grid-like structure of a raster distinguishes it from vector data, which represents geographic features using points, lines, and polygons. While vector data focuses on discrete spatial entities, rasters provide a continuous representation of data across the entire extent of the region.
+
+The raster data structure is commonly employed in various fields, including remote sensing, environmental modeling, terrain analysis, and geographic information systems (GIS). It offers a flexible and efficient means of storing and analyzing spatial data, facilitating tasks such as spatial interpolation, overlay analysis, and spatial statistics.
+
+## terra package
+
+The `terra` package is a powerful tool in R that offers a comprehensive suite of functions for handling raster data. It provides a wide range of capabilities, including creating, reading, manipulating, and writing raster data. These functions allow users to efficiently work with raster datasets and perform various operations on them.
+
+One of the notable strengths of the `terra` package is its collection of general raster data manipulation functions. These functions serve as building blocks and can be combined to develop more specialized functions tailored to specific analysis tasks. For instance, users can leverage functions to read a subset of raster values from a file or convert cell numbers to coordinates and vice versa, enabling them to extract relevant information and perform coordinate-based operations.
+
+Additionally, the `terra` package implements raster algebra, enabling users to perform mathematical operations on raster data. This capability is particularly useful when working with multiple overlapping rasters or when applying mathematical transformations to derive new raster layers.
+
+By encompassing such a comprehensive set of functions for raster data manipulation, the `terra` package empowers users to efficiently work with raster datasets, perform complex operations, and integrate spatial analysis seamlessly into their R workflow.
+
+
+## Data structure in terra
+
+The `terra` package is built upon several key classes, with `SpatRaster` and `SpatVector` being the most significant ones. These classes serve as the foundation for representing and manipulating spatial raster and vector data, respectively.
+
+
+### spatRaster
+
+A `SpatRaster` is a data structure used to represent multi-layer raster data. It contains essential parameters that describe the raster, including the number of columns and rows, the spatial extent (bounding box) that defines its coverage, and the coordinate reference system (map projection) used to define its spatial coordinates.
+
+Apart from these fundamental parameters, a `SpatRaster` object can also store information about the file(s) associated with the raster cell values. This allows for the possibility of storing the cell values either in memory or in external files. By supporting both options, `SpatRaster` provides flexibility in handling raster data, enabling efficient memory management for large datasets.
+
+When the raster cell values are stored in files, the `SpatRaster` object can hold metadata related to the file(s), such as file paths, data formats, compression methods, and other properties. This information facilitates efficient access and manipulation of raster data from external sources.
+
+In summary, a `SpatRaster` represents multi-layer raster data and contains essential parameters to describe its dimensions, spatial extent, and coordinate reference system. It also allows for the storage of raster cell values either in memory or in external files, enabling efficient handling of raster data and supporting various data management scenarios.
+
+These classes, `SpatRaster` and `SpatVector`, are fundamental to the `terra` package and serve as the primary means of representing and manipulating spatial raster and vector data, respectively. They provide a consistent and efficient framework for handling diverse spatial analysis tasks within the R environment.
+
+
+### spatVector
+
+A `SpatVector` in the `terra` package represents vector data, which encompasses geometries such as points, lines, or polygons, along with their associated tabular attributes. 
+
+The `SpatVector` class provides a versatile structure for storing and analyzing vector data within the `terra` package. It can handle different types of geometries, allowing you to work with point data (e.g., locations of sampling sites), line data (e.g., roads, rivers), or polygon data (e.g., land parcels, administrative boundaries).
+
+In addition to geometric information, `SpatVector` objects also store attribute data associated with the vector features. This tabular information could include attributes such as names, population counts, categories, or any other relevant information pertaining to the features.
+
+By combining both geometric and attribute data, `SpatVector` objects enable you to perform various operations and analyses on vector data. You can perform spatial queries, spatial joins, attribute filtering, and calculations based on the geometries and their attributes.
+
+
+## tidyterra package
+
+`tidyterra` is a package that extends the functionality of the `terra` package by incorporating principles and methods from the `tidyverse` ecosystem. It enhances the data manipulation and analysis capabilities of `SpatRaster` and `SpatVector` objects, allowing for a seamless integration of spatial data into the tidyverse workflow.
+
+With `tidyterra`, you can leverage the power of popular tidyverse packages like `dplyr`, `tidyr`, and `ggplot2` for working with `SpatRaster` and `SpatVector` objects. It provides a set of methods and functions that align with the tidyverse philosophy, allowing for consistent and intuitive data manipulation.
+
+For example, you can use `dplyr` functions like `filter()`, `mutate()`, and `select()` to filter, transform, and select specific subsets of your spatial data. The `gather()` and `spread()` functions from `tidyr` can be employed for reshaping your data into a tidy format.
+
+Furthermore, `tidyterra` includes specialized functions such as `as_tibble()` to convert `SpatRaster` and `SpatVector` objects into tidy tibbles, enabling smooth integration with other tidyverse functions and pipelines. This integration makes it easier to perform data wrangling, aggregation, and analysis on spatial datasets.
+
+In addition to data manipulation, `tidyterra` also provides `geom_spat*()` functions for plotting `SpatRaster` and `SpatVector` objects using `ggplot2`. This allows for the creation of visually appealing and informative plots, leveraging the flexibility and customization options offered by `ggplot2`.
+
+
+## Creating spatRaster
+
+To generate a `SpatRaster` from scratch using the `rast()` function in the `terra` package is a simple task. The default settings create a global raster data structure with a longitude/latitude coordinate reference system (CRS) and 1 by 1 degree cells. However, you have the option to modify these settings by providing additional arguments to the function or changing the parameters after creating the object. First, make sure the terra package is installed and loaded in your R environment:
+
+```{r}
+require(terra)
+require(tidyterra)
+require(tidyverse)
+```
+
+
+To create a `SpatRaster` from scratch with custom settings, you can specify arguments such as `xmin`, `nrow`, `ncol`, and `crs` when calling the `rast()` function. For example:
+
+```{r}
+
+my.rast <- rast(
+  xmin = -180, ymin = -90, xmax = 180, ymax = 90, 
+  nrow = 180, 
+  ncol = 360, 
+  crs = "+proj=longlat +datum=WGS84")
+```
+
+
+
+This example creates a `SpatRaster` object covering the entire globe with a resolution of 1 by 1 degree and a WGS84 (longitude/latitude) CRS.
+
+```{r}
+my.rast
+```
+
+
+To transform a `SpatRaster` object to a different CRS (projection), you can use the `crs()` function. It allows you to reproject the `SpatRaster` to a new CRS while preserving the underlying cell values. For example:
+
+```{r}
+my.rast.proj = my.rast
+crs(my.rast.proj) <- "+proj=utm +zone=37 +datum=WGS84"
+
+my.rast.proj
+```
+This will transform the `SpatRaster` object `r` to a new CRS specified by the Universal Transverse Mercator (UTM) projection with zone 37.
+
+
+In the example provided above, the `my.rast` object represents a skeleton or framework of a SpatRaster. It contains information about the number of rows and columns, as well as the geographic location of the raster. However, at this stage, there are no actual cell values associated with the my.rast object.
+
+let's first use `ncell` function to compute total number of cells in the `my.rast` raster.
+
+
+```{r}
+my.rast |>
+  ncell()
+```
+Then generate the random values of sea surface temprature equivalent to the number of cell in the my.rast spatRaster object
+
+```{r}
+my.values = rnorm(
+  n = my.rast |> ncell(), 
+  mean = 25, 
+  sd = 1.8
+  )
+```
+
+Then fill the sst values we just generated into the cells of the spatRaster object as highlighed in the code;
+
+```{r}
+my.rast.sst = my.rast
+my.rast.sst[] = my.values
+
+```
+
+In a nutshell, the The code `my.rast.sst = my.rast; my.rast.sst[] = my.values; my.rast.sst` creates a new `SpatRaster` object named `my.rast.sst` by assigning the `my.rast` object to it. Then, it assigns the values stored in the `my.values` variable to the cell values of the `my.rast.sst` object using the empty square brackets (`[]`) notation.
+
+
+
+```{r}
+my.rast.sst
+```
+ Finally, the code retrieves and returns the `my.rast.sst` object. This sequence of operations ensures that the `my.rast.sst` object has the same spatial properties as `my.rast`, but with the cell values replaced by the values in `my.values`. 
+ 
+## Reading spaRaster file
+
+While creating a SpatRaster object from scratch using the `rast()` function is useful, in many cases, you will need to import raster data from your working directory or external sources. To accomplish this, you can utilize the rast() function with appropriate arguments to read and import raster data. The function allows you to specify the file path or name of the raster file you want to import. 
+
+By providing the necessary information, such as the file format, location, and other relevant details, the rast() function will load the raster data into a SpatRaster object. This enables you to access and manipulate the imported raster data within your R environment for further analysis, visualization, or any other required tasks. Importing raster objects using the rast() function provides a convenient way to incorporate existing raster data into your workflow.
+
+
+
+```{r}
+bathy = rast("data/wioregio-7753.asc")
+
+bathy
+```
+
+
+```{r}
+bathy  |>
+  class()
+```
+
+
+
+```{r}
+crop_extent <- terra::ext(30,65,-30,10)
+
+```
+
+
+```{r}
+bath.wio = bathy |>
+  terra::crop(crop_extent)
+```
+
+
+
+```{r}
+bath.wio
+```
+
+
+
+```{r}
+#| label: fig-bath
+#| fig-cap: Bathymetry and altitude in the WIO region
+#| fig-width: 6
+#| fig-height: 8
+#| warning: false
+#| message: false
+#| 
+ggplot()+
+  tidyterra::geom_spatraster(data = bath.wio)+
+  tidyterra::scale_fill_hypso_tint_c(
+    palette = "gmt_globe",
+    labels = scales::label_number(),
+    breaks = seq(-6000, 6000,3000), 
+    # limits = c(-6000, 6500),
+    guide = guide_colorbar(
+      direction = "horizontal",
+      title = "Bathymetry & altitude (meters)",
+      title.position = "top",
+      barwidth = 12, barheight = 0.8
+    ))+
+  coord_sf(expand = FALSE) +
+  theme_bw(base_size = 14) +
+  theme(legend.position = "top")
+
+```
+
+## spatRaster manipulation with tidyterra
+
+### rename
+
+```{r}
+bath.depth = bath.wio %>% 
+  tidyterra::rename(depth = 1)
+
+bath.depth
+```
+### filter
+
+```{r}
+ocean = bath.depth %>% 
+  tidyterra::filter(depth <= 0)
+
+ocean
+
+```
+### mutate
+
+```{r}
+ocean.depth = ocean %>% 
+  tidyterra::mutate(bathy = depth * -1)
+
+ocean.depth
+
+```
+### select
+
+```{r}
+ocean.depth  %>% 
+  tidyterra::select(depth)
+
+```
+
+### pull
+
+```{r}
+ocean.depth %>% 
+  tidyterra::select(bathy) %>% 
+  tidyterra::pull()
+
+```
+
+## Spatvector
+
+```{r}
+# africa = terra::vect("data/africa.gpkg")
+
+africa = spData::world |> 
+  filter(continent == "Africa") |> 
+  select(country = name_long, pop) |>
+  terra::vect()
+```
+
+```{r}
+#| eval: false
+
+
+
+
+ggplot(data = africa) +
+  tidyterra::geom_spatvector(aes(fill = pop), color = "ivory")+
+  tidyterra::geom_spatvector_text(aes(label  = country), color = "ivory", size = 2.5) +
+  scale_fill_binned(labels=scales::number_format(big.mark = ","), type = "viridis")+
+  coord_sf(crs = 3857)+
+  theme_bw()+
+  theme(axis.title = element_blank())
+  
+```
+

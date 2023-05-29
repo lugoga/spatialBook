@@ -1,0 +1,8 @@
+"0","#| warning: false"
+"0","#| message: false"
+"0","#| echo: false"
+"0",""
+"0",""
+"0","readr::read_csv(""data/tidy/landings_wio_country.csv"", skip = 4) |> "
+"0","  dplyr::filter(year == 2015)|>"
+"0","  dplyr::select(country=name, year, catch) "

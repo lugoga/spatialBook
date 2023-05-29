@@ -1,0 +1,337 @@
+# Preface {.unnumbered}
+
+## Welcome {.unnumbered}
+
+Welcome to the world of spatial data and analysis in R! In today's data-driven era, the importance of spatial information cannot be overstated. From urban planning and environmental management to transportation logistics and public health, the ability to understand and analyze spatial data has become essential for making informed decisions and solving complex problems.
+
+This book serves as your comprehensive guide to harnessing the power of R for working with spatial data. Whether you are a student, researcher, data scientist, or professional in a related field, this resource will equip you with the knowledge and skills to effectively manipulate, visualize, analyze, and model spatial data using R.
+
+R, a widely used programming language for statistical computing and graphics, offers a rich set of packages and tools specifically tailored for spatial data analysis. With its extensive capabilities, R provides a versatile and efficient environment for working with diverse spatial datasets, ranging from point patterns and geospatial polygons to raster data and satellite imagery.
+
+In this book, we will start by introducing the fundamentals of spatial data and its representation in R. You will learn about spatial objects, coordinate reference systems, and the various data structures used to handle spatial information efficiently. We will explore techniques for importing, exporting, and manipulating spatial data, ensuring that you have a solid foundation for subsequent analysis.
+
+The core of this book revolves around spatial analysis techniques in R. We will delve into essential topics such as spatial data visualization, spatial statistics, spatial interpolation, spatial regression, and geostatistics. Through step-by-step tutorials, code examples, and real-world applications, you will gain a deep understanding of how to apply these techniques to uncover patterns, explore relationships, and derive meaningful insights from spatial data.
+
+Additionally, we will explore advanced topics such as spatial data modeling, spatial clustering, and spatial optimization, which will enable you to tackle complex spatial problems and make informed decisions. Throughout the book, we will emphasize the importance of sound statistical principles and best practices for spatial data analysis.
+
+Each chapter is carefully crafted to provide a balance between theoretical concepts, practical demonstrations, and hands-on exercises. The code snippets and reproducible examples provided will help you to grasp the concepts effectively and apply them to your own spatial analysis tasks. We encourage you to actively engage with the material, experiment with the code, and explore additional resources to deepen your understanding.
+
+Finally, we would like to express our sincere appreciation to the open-source community, which has contributed immensely to the development of R and its spatial packages. We are grateful to the countless individuals who have shared their knowledge, expertise, and code, making spatial data analysis in R accessible and empowering users around the world.
+
+We hope that this book will serve as your valuable companion in your journey through the fascinating realm of spatial data and analysis in R. By the end, we aim to equip you with the skills and confidence to unlock the hidden insights in spatial data and contribute to the advancement of knowledge in your respective domains.
+
+Let's embark on this exciting adventure together and explore the vast possibilities of spatial data analysis in R!
+
+Happy spatial coding!
+
+Masumbuko SEMBA
+
+## What is R? {.unnumbered}
+
+**R** is a programming language and environment, originally developed for statistical computing and graphics. As of October 2020, there are \~16,000 R **packages** in the official repository [CRAN](https://cran.r-project.org/web/packages/)^[2](https://geobgu.xyz/r-2021/index.html#fn2)^.
+
+Notable advantages of R are that it is a full-featured programming language, yet customized for working with data, relatively simple and has a huge collection of over 100,000 functions from various areas of interest.
+
+R\'s popularity has been steadily increasing in recent years (Figures [0.1](https://geobgu.xyz/r-2021/index.html#fig:r-stackoverflow-trend)--[0.3](https://geobgu.xyz/r-2021/index.html#fig:r-proportion-papers)).
+
+Figure 0.1: Stack Overflow Trend for the \'r\' question tag (<https://insights.stackoverflow.com/trends?tags=r>)
+
+Figure 0.2: IEEE Language Rankings 2019 (<https://spectrum.ieee.org/computing/software/the-top-programming-languages-2019>)
+
+Figure 0.3: Proportion of research papers citing R (<https://www.nature.com/news/programming-tools-adventures-with-r-1.16609>)
+
+A brief overview of the capabilities and packages for several domains of R use, are available in the [\"CRAN Task Views\"](https://cran.r-project.org/web/views/) (Figure [0.4](https://geobgu.xyz/r-2021/index.html#fig:task-views)).
+
+Figure 0.4: CRAN Task Views (<http://www.maths.lancs.ac.uk/~rowlings/R/TaskViews/>)
+
+## R and analysis of spatial data {.unnumbered}
+
+### Introduction {.unnumbered}
+
+Over time, there was an increasing number of contributed packages for handling and analyzing spatial data in R. Today, spatial analysis is a major functionality in R. As of October 2020, there are at least 185 *packages*^[3](https://geobgu.xyz/r-2021/index.html#fn3)^ specifically addressing spatial analysis in R.
+
+Figure 0.5: Books on Spatial Data Analysis with R
+
+Some important events in the history of spatial analysis support in R are summarized in Table [0.1](https://geobgu.xyz/r-2021/index.html#tab:r-history).
+
+|          |                                                                                                                              |
+|----------|------------------------------------------------------------------------------------------------------------------------------|
+|          | Table 0.1: Significant events in the history of R-spatial                                                                    |
+| **Year** | **Event**                                                                                                                    |
+| pre-2003 | Variable and incomplete approaches (`MASS`, `spatstat`, `maptools`, `geoR`, `splancs`, `gstat`, ...)                         |
+| 2003     | Consensus that a package defining standard data structures should be useful; `rgdal` released on CRAN                        |
+| 2005     | `sp` released on CRAN; `sp` support in `rgdal` (Section [7.1.3](https://geobgu.xyz/r-2021/vector-layers.html#the-sp-package) |
+| 2008     | *Applied Spatial Data Analysis with R*, 1^st^ ed.                                                                            |
+| 2010     | `raster` released on CRAN (Section [5.3.4](https://geobgu.xyz/r-2021/matrices-and-rasters.html#raster-package))              |
+| 2011     | `rgeos` released on CRAN                                                                                                     |
+| 2013     | *Applied Spatial Data Analysis with R*, 2^nd^ ed.                                                                            |
+| 2016     | `sf` released on CRAN (Section [7.1.4](https://geobgu.xyz/r-2021/vector-layers.html#the-sf-package))                         |
+| 2018     | `stars` released on CRAN (Section [5.3.5](https://geobgu.xyz/r-2021/matrices-and-rasters.html#the-stars-package))            |
+| 2019     | *Geocomputation with R* (<https://geocompr.robinlovelace.net/>)                                                              |
+| 2021(?)  | *Spatial Data Science* (<https://www.r-spatial.org/book/>)                                                                   |
+
+The question that arises here is: can R be used as a Geographic Information System (GIS), or as a comprehensive toolbox for doing spatial analysis? The answer is definitely *yes*. Moreover, R has some important advantages over traditional approaches to GIS, i.e., software with graphical user interfaces such as ArcGIS or QGIS.
+
+*General* advantages of Command Line Interface (CLI) software include:
+
+-   **Automation**---Doing otherwise unfeasible repetitive tasks
+
+-   **Reproducibility**---Precise control of instructions to the computer
+
+Moreover, *specific* strengths of R as a GIS are:
+
+-   R capabilities in data **processing** and **visualization**, combined with dedicated **packages** for spatial data
+
+-   A **single environment** encompassing all analysis aspects---acquiring data, computation, statistics, visualization, Web, etc.
+
+Nevertheless, there are situations when *other* tools are needed:
+
+-   **Interactive** editing or georeferencing (but see [`mapedit`](https://cran.r-project.org/package=mapedit) package)
+
+-   Unique GIS **algorithms** (3D analysis, label placement, splitting lines at intersections)
+
+-   Data that cannot fit in **RAM** (but R can connect to spatial databases^[4](https://geobgu.xyz/r-2021/index.html#fn4)^ and other softwere for working with big data)
+
+The following sections ([0.3.2](https://geobgu.xyz/r-2021/index.html#input-and-output-of-spatial-data)--[0.3.11](https://geobgu.xyz/r-2021/index.html#leaflet-mapview-web-mapping)) highlight some of the capabilities of spatial data analysis packages in R, through short examples. We are going to elaborate on most of these packages later on in the book, and many of those examples will become clear.
+
+### Input and output of spatial data {.unnumbered}
+
+Reading spatial layers from a file into an R data structure, or writing the R data structure into a file, are handled by external libraries:
+
+-   [**GDAL/OGR**](https://gdal.org/) is used for reading/writing vector and raster files, with `sf` and `stars`
+
+-   [**PROJ**](https://proj.org/) is used for handling Coordinate Reference Systems (CRS), in both `sf` and `stars`
+
+-   Working with specialized formats, e.g., **NetCDF** with `ncdf4`
+
+Package `sf` combined with `RPostgreSQL` can be used to read from, and write to, a **PostGIS** spatial database:
+
+```         
+library(sf) library(RPostgreSQL) con = dbConnect(   PostgreSQL(),   dbname = "gisdb",   host = "159.89.13.241",   port = 5432,   user = "geobgu",   password = "*******" ) dat = st_read(con, query = "SELECT name_lat, geometry FROM plants LIMIT 5;")
+```
+
+```         
+dat ## Simple feature collection with 5 features and 1 field ## Geometry type: POINT ## Dimension:     XY ## Bounding box:  xmin: 35.1397 ymin: 31.44711 xmax: 35.67976 ymax: 32.77013 ## Geodetic CRS:  WGS 84 ##         name_lat                  geometry ## 1    Iris haynei POINT (35.67976 32.77013) ## 2    Iris haynei   POINT (35.654 32.74137) ## 3 Iris atrofusca POINT (35.19337 31.44711) ## 4 Iris atrofusca POINT (35.18914 31.51475) ## 5  Iris vartanii  POINT (35.1397 31.47415)
+```
+
+###`sf`: Processing Vector Layers {.unnumbered}
+
+[**GEOS**](http://trac.osgeo.org/geos/) is used for geometric operations on **vector layers** with `sf`:
+
+-   **Numeric operators**---Area, Length, Distance...
+
+-   **Logical operators**---Contains, Within, Within distance, Crosses, Overlaps, Equals, Intersects, Disjoint, Touches...
+
+-   **Geometry generating operators**---Centroid, Buffer, Intersection, Union, Difference, Convex-Hull, Simplification...
+
+Figure 0.6: Buffer function
+
+###`stars`: Processing Rasters {.unnumbered}
+
+Geometric operations on *rasters* can be done with package `stars`:
+
+-   **Accessing cell values**---As matrix / array, Extracting to points / lines / polygons
+
+-   **Raster algebra**---Arithmetic (`+`, `-`, ...), Math (`sqrt`, `log10`, ...), logical (`!`, `==`, `>`, ...), summary (`mean`, `max`, ...), Masking
+
+-   **Changing resolution and extent**---Cropping, Mosaic, Resampling, Reprojection
+
+-   **Transformations**---Raster \<-\> Points / Contour lines / Polygons
+
+### `geosphere`: Geometric calculations on longitude/latitude {.unnumbered}
+
+Package `geosphere` implements *spherical* geometry functions for distance- and direction-related calculations on geographic coordinates (lon-lat).
+
+Figure 0.7: Points on Great Circle
+
+Figure 0.8: Visualizing Facebook Friends with `geosphere` (<http://paulbutler.org/archives/visualizing-facebook-friends/>)
+
+### `gstat`: Geostatistical Modelling {.unnumbered}
+
+As mentioned above, R was initially developed for statistical computing (Section [0.2](https://geobgu.xyz/r-2021/index.html#what-is-r)). Accordingly, there is an extensive set of R packages for *spatial statistics*. For example, package `gstat` provides a comprehensive set of functions for univariate and multivariate geostatistics, mainly for the purpose of spatial *interpolation*:
+
+-   Variogram modelling
+
+-   Ordinary and universal point or block (co)kriging
+
+-   Cross-validation
+
+Figure 0.9: Predicted Zinc concentration, using Ordinary Kriging
+
+We are going to learn about the `gstat` package in Chapter [12](https://geobgu.xyz/r-2021/spatial-interpolation-of-point-data.html#spatial-interpolation-of-point-data). An introduction to the package can also be found in Chapter 8 of *Applied Spatial Data Analysis with R* ([Bivand, Pebesma, and Gomez-Rubio 2013](https://geobgu.xyz/r-2021/references.html#ref-bivand2013)).
+
+### `spdep`: Spatial dependence modelling {.unnumbered}
+
+Modelling with spatial weights:
+
+-   Building neighbor lists and spatial weights
+
+-   Tests for spatial autocorrelation for areal data (e.g., Moran\'s I)
+
+-   Spatial regression models (e.g., SAR, CAR)
+
+Figure 0.10: Neighbours list based on regions with contiguous boundaries
+
+The `spdep` package is beyond the scope of this book. An introduction to the package can be found in Chapter 9 of *Applied Spatial Data Analysis with R* ([Bivand, Pebesma, and Gomez-Rubio 2013](https://geobgu.xyz/r-2021/references.html#ref-bivand2013)).
+
+### `spatstat`: Spatial point pattern analysis {.unnumbered}
+
+Package `spatstat` provides a comprehensive collection of techniques for statistical analysis of spatial point patterns, such as:
+
+-   Kernel density estimation
+
+-   Detection of clustering using Ripley\'s K-function
+
+-   Spatial logistic regression
+
+Figure 0.11: Distance map for the Biological Cells point pattern dataset
+
+The book *Spatial point patterns: methodology and applications with R* ([Baddeley, Rubak, and Turner 2015](https://geobgu.xyz/r-2021/references.html#ref-baddeley2015)) provides a thorough introduction to the subject of point pattern analysis using the `spatstat` package. A more brief introduction can also be found in Chapter 7 of *Applied Spatial Data Analysis with R* ([Bivand, Pebesma, and Gomez-Rubio 2013](https://geobgu.xyz/r-2021/references.html#ref-bivand2013)).
+
+### `osmdata`: Access to OpenStreetMap data {.unnumbered}
+
+Package `osmdata` gives access to **OpenStreetMap (OSM)** data---the most extensive open-source map database in the worls---using the **Overpass API**^[5](https://geobgu.xyz/r-2021/index.html#fn5)^.
+
+```         
+library(sf) library(osmdata) q = opq(bbox = "Beer-Sheva, Israel") q = add_osm_feature(q, key = "highway") dat = osmdata_sf(q) lines = dat$osm_lines pol = dat$osm_polygons pol = st_cast(pol, "MULTILINESTRING") pol = st_cast(pol, "LINESTRING") lines = rbind(lines, pol) lines = lines[, "highway"] lines = st_transform(lines, 32636) plot(lines, key.pos = 4, key.width = lcm(4), main = "")
+```
+
+Figure 0.12: Beer-Sheva road types map, using data downloaded from OpenStreetMap (OSM)
+
+### `ggplot2`: Visualization {.unnumbered}
+
+The `ggplot2` package is one of the most popular packages in R. It provides advanced visualization methods through a well-designed and consistent syntax. The package supports visualization of both vector layers^[6](https://geobgu.xyz/r-2021/index.html#fn6)^ and rasters^[7](https://geobgu.xyz/r-2021/index.html#fn7)^.
+
+The `ggplot2` package is highly customizable and capable of producing publication-quality figures and maps as well as original and innovative designs (Figure [0.13](https://geobgu.xyz/r-2021/index.html#fig:london-cycle-hire)). One of its strengths is in easy preparation of \"small-multiple\"---or facet, in the terminology of `ggplot2`---figures (Figure [0.14](https://geobgu.xyz/r-2021/index.html#fig:ggplot2-facets)).
+
+Figure 0.13: London cycle hire journeys with `ggplot2` (<http://spatial.ly/2012/02/great-maps-ggplot2/>)
+
+Figure 0.14: Crime density by day with `ggplot2`
+
+The `ggplot2` package is beyond the scope of this book. A good place to start is the book *ggplot2: Elegant Graphics for Data Analysis*, by package author ([Wickham 2016](https://geobgu.xyz/r-2021/references.html#ref-wickham2016)). The book is available online^[8](https://geobgu.xyz/r-2021/index.html#fn8)^.
+
+### `leaflet`, `mapview`: Web mapping {.unnumbered}
+
+Packages `leaflet` and `mapview` provide methods to produce **interactive maps** using the [Leaflet JavaScript library](http://leafletjs.com/).
+
+Package [`leaflet`](https://rstudio.github.io/leaflet/) gives more low-level control. Package [`mapview`](https://r-spatial.github.io/mapview/) is a wrapper around `leaflet`, automating addition of useful features:
+
+-   Commonly used basemaps
+
+-   Color scales and legends
+
+-   Labels
+
+-   Popups
+
+Function `mapview` produces an interactive map given a spatial object. The `zcol` parameter is used to specify the *attribute* used for symbology:
+
+```         
+library(sf) library(mapview) states = st_read("USA_2_GADM_fips.shp") mapview(states, zcol = "NAME_1")
+```
+
+Figure 0.15: Intractive map made with `mapview`
+
+## Other materials {.unnumbered}
+
+This section lists some other resources that are relevant for working with spatial data in R.
+
+### Books {.unnumbered}
+
+-   *Model-based Geostatistics* ([Diggle and Ribeiro 2007](https://geobgu.xyz/r-2021/references.html#ref-diggle2007))
+
+-   [*A Practical Guide to Geostatistical Mapping*](http://spatial-analyst.net/book/system/files/Hengl_2009_GEOSTATe2c1w.pdf) ([Hengl 2009](https://geobgu.xyz/r-2021/references.html#ref-hengl2009))
+
+-   *Spatial Data Analysis in Ecology and Agriculture using R* (1^st^ ed. 2012, 2^nd^ ed. 2018) ([Plant 2018](https://geobgu.xyz/r-2021/references.html#ref-plant2018spatial))
+
+-   *Learning R for Geospatial Analysis* ([Dorman 2014](https://geobgu.xyz/r-2021/references.html#ref-dorman2014))
+
+-   *Applied Spatial Data Analysis with R* (1^st^ ed. 2008, 2^nd^ ed. 2013) ([Bivand, Pebesma, and Gomez-Rubio 2013](https://geobgu.xyz/r-2021/references.html#ref-bivand2013))
+
+-   *Hierarchical Modeling and Analysis for Spatial Data* (1^st^ ed. 2003, 2^nd^ ed. 2014) ([Banerjee, Carlin, and Gelfand 2014](https://geobgu.xyz/r-2021/references.html#ref-banerjee2014))
+
+-   [*An Introduction to R for Spatial Analysis and Mapping*](https://bookdown.org/lexcomber/brunsdoncomber2e/) (1^st^ ed. 2015, 2^nd^ ed. 2018) ([Brunsdon and Comber 2015](https://geobgu.xyz/r-2021/references.html#ref-brunsdon2015))
+
+-   *Spatial Point Patterns: Methodology and Applications with R* (2015) ([Baddeley, Rubak, and Turner 2015](https://geobgu.xyz/r-2021/references.html#ref-baddeley2015))
+
+-   *Displaying Time Series, Spatial, and Space-Time Data with R* (1^st^ ed. 2014, 2^nd^ ed. 2018) ([Lamigueiro 2014](https://geobgu.xyz/r-2021/references.html#ref-lamigueiro2014))
+
+-   [*Predictive Soil Mapping with R*](https://soilmapper.org/) ([Hengl and MacMillan 2019](https://geobgu.xyz/r-2021/references.html#ref-hengl2019))
+
+-   [*Geocomputation with R*](https://geocompr.robinlovelace.net/) ([Lovelace, Nowosad, and Muenchow 2019](https://geobgu.xyz/r-2021/references.html#ref-lovelace2019))
+
+-   [*Spatial Data Science*](https://www.r-spatial.org/book/) (2021?)
+
+### Papers {.unnumbered}
+
+-   Pebesma, E., Bivand, R. S. (2005). *Classes and Methods for Spatial Data: the sp Package*. R news, 5(2), 9-13. \[[PDF](https://www.r-project.org/doc/Rnews/Rnews_2005-2.pdf)\]
+
+-   Pebesma, E. (2018). *Simple Features for R: Standardized Support for Spatial Vector Data*. The R Journal, 10(1):439-446. \[[PDF](https://journal.r-project.org/archive/2018/RJ-2018-009/RJ-2018-009.pdf)\]
+
+### Courses and tutorials {.unnumbered}
+
+#### Courses {.unnumbered}
+
+-   [GEOG 4/595: Geographic Data Analysis](https://pjbartlein.github.io/GeogDataAnalysis/index.html)
+
+-   [CP6521 Advanced GIS](https://rstudio-pubs-static.s3.amazonaws.com/460816_f7e4d237e0334e9887323686041bd762.html)
+
+-   [ES214 Introduction to GIS and Spatial Analysis](https://mgimond.github.io/Spatial/index.html)
+
+-   [GEOG 4/590: R for Earth-System Science](http://geog.uoregon.edu/bartlein/courses/geog490/index.html)
+
+-   [GEOG 4/595: Geographic Data Analysis](https://pjbartlein.github.io/GeogDataAnalysis/)
+
+-   [Spatial Data Science with R (Robert J. Hijmans)](http://rspatial.org/)
+
+-   [Introduction to Spatial Data Programming with R (this course)](http://132.72.155.230:3838/r/)
+
+-   [GISC 422 Spatial Analysis and Modelling](https://github.com/DOSull/GISC-422)
+
+-   [CASA0005 Geographic Information Systems and Science](https://andrewmaclachlan.github.io/CASA0005repo/index.html)
+
+-   Another list [here](https://geocompr.github.io/guestbook/)
+
+#### Tutorials {.unnumbered}
+
+-   [Geospatial Data Science with R](https://zia207.github.io/geospatial-data-science.github.io/index.html)
+
+-   [Data Carpentry Workshops](https://datacarpentry.org/lessons/#geospatial-curriculum)
+
+-   [GIS in R (Nick Eubank)](http://www.nickeubank.com/gis-in-r/)
+
+-   [NEON Data Tutorials](https://www.neonscience.org/resources/data-tutorials)
+
+-   [Learn Spatial Analysis (University of Chicago)](https://spatialanalysis.github.io/)
+
+-   [WUR Geoscripting](https://geoscripting-wur.github.io/)
+
+-   [Mapping in R](https://ryanpeek.org/mapping-in-R-workshop/index.html)
+
+-   [Spatial Analysis notes](https://gdsl-ul.github.io/san/)
+
+-   [Classifying Satellite Imagery in R](https://urbanspatial.github.io/classifying_satellite_imagery_in_R/)
+
+-   [Fundamentals of Spatial Analysis in R](https://mhweber.github.io/AWRA_2020_R_Spatial/)
+
+-   [Handling and Analyzing Vector and Raster Data Cubes with R](https://edzer.github.io/OGH20/)
+
+-   [Introduction to geospatial data analysis in R](https://pmarchand1.github.io/atelier_rgeo/rgeo_workshop.html)
+
+####  Presentations {.unnumbered}
+
+-   [UseR! 2017: Tutorial \"Spatial Data in R: New Directions\"](https://edzer.github.io/UseR2017/)
+
+-   [UseR! 2019: Spatial workshop part I](https://edzer.github.io/UseR2019/part1.html)
+
+-   [UseR! 2019: Spatial workshop part II](https://edzer.github.io/UseR2019/part2.html)
+
+-   [Why-R 2020: Applied Spatial Data Analysis with R: retrospect and prospect](https://github.com/rsbivand/whyR20_files)
+
+####  Official materials {.unnumbered}
+
+-   [`sf` Vignettes](https://cran.r-project.org/web/packages/sf/index.html)
+
+-   [`stars` Vignettes](https://cran.r-project.org/web/packages/stars/index.html)
+
+

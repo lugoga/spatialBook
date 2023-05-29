@@ -1,0 +1,4 @@
+"0",""
+"0","## or you can bind the variable you want to remove"
+"0","ctd %>% "
+"0","  select(-c(spar, par, density, time))"

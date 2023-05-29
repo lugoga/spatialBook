@@ -1,0 +1,5 @@
+"0","#| label: tbl-score"
+"0","#| tbl-cap: Variables in the data frame"
+"0",""
+"0","tb |>"
+"0","  gt::gt()"

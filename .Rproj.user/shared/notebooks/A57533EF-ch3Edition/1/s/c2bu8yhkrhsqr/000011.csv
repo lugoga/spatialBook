@@ -1,0 +1,7 @@
+"0","#| warning: false"
+"0","#| message: false"
+"0","#| comment: """""
+"0","#| "
+"0","imported.lfq = read_csv(""data/tidy/tidy_LFQ_sample_4.csv"")"
+"0",""
+"0",""

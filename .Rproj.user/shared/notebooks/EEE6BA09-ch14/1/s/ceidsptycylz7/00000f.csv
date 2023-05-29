@@ -1,0 +1,8 @@
+"0","#merging"
+"0","df <- rbind(max_min, df)"
+"0"," "
+"0","# Set graphic colors"
+"0","nb.cols <- length(df_years)"
+"0","mycolors <- colorRampPalette(brewer.pal(8, ""Set2""))(nb.cols)"
+"0","colors_border <- mycolors  "
+"0","colors_in <- alpha(mycolors, 0.3) "

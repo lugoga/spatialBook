@@ -1,0 +1,7 @@
+"0","#| label: fig-bar"
+"0","#| fig-pos: H"
+"0","#| fig-cap: Length frequency of bigeye tuna"
+"0","#| fig-width: 6"
+"0","#| fig-height: 4"
+"0",""
+"0","barplot(table(group), las = 1, horiz = FALSE, col = c(""blue"", ""green"", ""red""), ylab = ""Frequency"", xlab = """")"

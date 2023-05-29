@@ -1,0 +1,5 @@
+"0","paste(""There are"", ""5"", ""books."") ## [1] ""There are 5 books."" paste(""There are"", ""5"", ""books."", sep = ""_"") ## [1] ""There are_5_books."""
+"1","[1]"
+"1"," ""There are 5 books."""
+"1","
+"

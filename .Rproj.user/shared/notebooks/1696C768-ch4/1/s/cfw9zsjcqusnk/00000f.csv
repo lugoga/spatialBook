@@ -1,0 +1,4 @@
+"0","ctd %>% group_by(station, lon)%>%"
+"0","  summarise(Mean = mean(fluorescence, na.rm = TRUE),"
+"0","           STD = sd(fluorescence, na.rm = TRUE))"
+"2","`summarise()` has grouped output by 'station'. You can override using the `.groups` argument."

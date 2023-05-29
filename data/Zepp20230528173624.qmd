@@ -1,0 +1,55 @@
+---
+title: "Untitled"
+---
+
+```{r}
+require(tidyverse)
+require(sf)
+require(tmap)
+
+tmap_mode(mode = "view")
+```
+
+
+
+```{r}
+sf::st_layers("data/Zepp20230528173624.gpx")
+```
+
+
+```{r}
+aa = sf::st_read("data/Zepp20230528173624.gpx", layer = "tracks")
+
+aa
+```
+
+```{r}
+tm_shape(shp = aa) +
+  tm_lines()
+```
+
+
+```{r}
+aa %>% 
+  select(geometry) %>% 
+  st_cast("POLYGON")%>%
+  st_make_valid() %>% 
+  st_is_valid()
+  tm_shape() +
+  tm_lines()
+```
+
+
+```{r}
+buh = st_read("f:/2023/DIgitalBooks/SpatialAnalysis/data/ndio.gpkg")
+
+area = buh %>% 
+  st_transform("epsg:32736") %>% 
+  st_make_valid() %>% 
+  st_area() %>% as.numeric()/4046.86 %>% 
+  round(2)
+
+paste("The computed area is: ",area, "acre")
+
+```
+

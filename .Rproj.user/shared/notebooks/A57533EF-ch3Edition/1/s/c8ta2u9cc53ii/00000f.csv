@@ -1,0 +1,6 @@
+"0"," text_factor <- as.factor(text) # transform to factor"
+"0","    class(text_factor) # recheck the class"
+"1","[1]"
+"1"," ""factor"""
+"1","
+"

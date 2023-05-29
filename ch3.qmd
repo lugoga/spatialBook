@@ -1,0 +1,434 @@
+# Time  and Date
+
+In this chapter, our primary focus is on working with data that represents time, specifically dates. We aim to equip you with the skills to visualize your data using graphical functions and to define custom functions. By the end of this chapter, you will have a better understanding of how to work with time-based data and how to present it in a meaningful way. Whether you are a data analyst or a researcher, these skills are essential for making informed decisions and communicating your findings effectively. So, let's dive in and explore the exciting world of time-based data analysis!
+
+
+## Dates
+Dates play a crucial role in data analysis and represent an essential component in many datasets. In R, working with dates is made easy through a range of functions and packages specifically designed for handling date-related operations. Dates in R are represented as objects, allowing for convenient manipulation and calculations. 
+
+With R's built-in date functions and packages like `lubridate`, users can create, format, and perform various operations on date objects. These operations include extracting components like year, month, and day, performing arithmetic operations to calculate time intervals, comparing dates, and visualizing temporal data. With the flexibility and functionality offered by R, users can effectively work with dates to gain valuable insights and make informed decisions based on temporal patterns in their data.
+
+### Date and time classes in R
+
+In R, there are specific classes designed for representing times and time-series data. These classes provide specialized functionalities for handling temporal information. Some of the commonly used classes include:
+
+1. **POSIXct**: This class represents time as the number of seconds since January 1, 1970 (known as the Unix epoch) in the UTC time zone. It offers precision up to the second and is suitable for handling timestamps.
+
+2. **POSIXlt**: Similar to the POSIXct class, POSIXlt represents time as the number of seconds since the Unix epoch. However, it provides more detailed components like year, month, day, hour, minute, and second. POSIXlt objects are useful when you need to work with individual time components.
+
+3. **Date**: The Date class is used to represent dates without time information. Dates are stored as the number of days since January 1, 1970. This class is useful when you want to work with dates and perform date-specific operations.
+
+4. **Time-Series**: R provides the `ts` class to handle time-series data, which is a combination of time and corresponding data values. The `ts` class allows for efficient storage and manipulation of time-series data and supports various time-based operations.
+
+5. **xts**: The `xts` (eXtensible Time Series) class is an extension of the `ts` class and provides enhanced functionality for working with time-series data. It includes features like subsetting, merging, and advanced time-based calculations.
+
+These specialized classes make it easier to work with time and time-series data in R. In this book, we will only be working with the `Date` class, which is used to represent times of type *date*.
+
+### Working with `Date` objects
+
+#### Today's date
+
+The Date data structure is the simplest and most basic way to represent dates in R. It is specifically designed to store dates without the inclusion of the time of day. One common use of Date is to represent calendar dates, such as birthdays, holidays, or any event that is not concerned with specific timestamps. 
+
+To obtain the current date in R, you can use the `Sys.Date()` function. This function retrieves the current system date and returns it as a Date object. Here's an example:
+
+
+```{r}
+current_date <- Sys.Date()
+current_date
+```
+The output will be the current date in the format *YYYY-MM-DD*, where *YYYY* represents the year, *MM* represents the month, and *DD* represents the day. By utilizing the `Sys.Date()` function, you can easily retrieve the current date for various purposes, such as tracking data entry, performing date-based calculations, or generating reports based on the current date.
+
+
+
+```{r}       
+
+current_date |>
+  class()
+```
+
+#### Converting `character` to `Date`
+
+In addition to retrieving the current date using `Sys.Date()`, we can also convert character values to Date objects using the `as.Date()` function. This allows us to create Date objects representing specific dates of our choice.
+
+The `as.Date()` function takes a character value as input and converts it to a Date object based on the specified format. The format is specified using the format parameter, which follows the conventions of the strftime() function in C. Here's an example:
+
+```{r}
+custom_date <- as.Date("2023-05-24", format = "%Y-%m-%d")
+custom_date
+```
+
+In this example, the character value "2023-05-24" is converted to a Date object using the %Y-%m-%d format, where %Y represents the year with century, %m represents the month, and %d represents the day.
+
+
+When the `character` values are in the standard date format (`YYYY-MM-DD`), such as in the above example, the `as.Date` function works without any additional arguments. However, when the `character` values are in a *non-standard* format, we need to specify the format definition with `format`, using the various date component symbols. Table [3.1] lists the most commonly used symbols for specifying date formats in R. The full list of symbols can be found in `?strptime`.
+
+|            |             |                                            |
+|------------|-------------|--------------------------------------------|
+|            |             | Table 3.1: Common `Date` format components |
+| **Symbol** | **Example** | **Meaning**                                |
+| `%d`       | `"15"`      | Day                                        |
+| `%m`       | `"08"`      | Month, numeric                             |
+| `%b`       | `"Aug"`     | Month, 3-letter                            |
+| `%B`       | `"August"`  | Month, full                                |
+| `%y`       | `14`        | Year, 2-digit                              |
+| `%Y`       | `2014`      | Year, 4-digit                              |
+
+Before going into examples of date formatting, it is useful to set the standard `"C"` locale in R. That way, we make sure that month or weekday names are interpreted in *English* as intended:
+
+```{r}         
+Sys.setlocale("LC_TIME", "C") ## [1] "C"
+```
+
+For example, converting the following `character` date---which is in a non-standard format---to `Date` fails when `format` is not specified:
+
+```{r} 
+#| eval: false
+as.Date("07/Aug/12") 
+
+# Error in charToDate(x) 
+```
+
+Specifying the right `format`, which is `"%d/%b/%y"` in this case, leads to a successful conversion:
+
+```{r}         
+as.Date("07/Aug/12", format = "%d/%b/%y") 
+```
+
+> What will be the result if we used `format="%y/%b/%d"` (switching `%d` and `%y`) in the above expression?
+
+Here is another example with a different non-standart format (`"%Y-%B-%d"`):
+
+```{r}   
+#| eval: false
+#| 
+as.Date("2012-August-07")
+# Error in charToDate(x) 
+```
+
+Using the `anytime::anytime()` function allows us to handle a broader range of date formats without explicitly specifying the format. It provides convenience and flexibility in parsing date strings and converting them to appropriate date objects.
+
+```{r}         
+anytime::anytime(("2012-August-07") )
+```
+
+```{r}         
+as.Date("2012-August-07", format = "%Y-%B-%d") 
+```
+
+#### Converting `Date` to `character`
+
+A `Date` can always be converted back to `character` using `as.character`:
+
+```{r}         
+d = as.Date("1961-12-09") 
+d 
+```
+
+```{r}           
+class(d) 
+```
+
+```{r}          
+as.character(d) 
+```
+
+```{r}           
+class(as.character(d)) ## [1] "character"
+```
+
+Note that both the `Date` and the `character` objects are printed exactly the same way, so we have to use `class` to figure out which class we are dealing with.
+
+The `as.character` function, by default, returns a text string with all three date components in the standard `YYYY-MM-DD` (or `"%Y-%m-%d"`) format. Using the `format` argument, however, lets us compose different date formats, or *extract* individual date components out of a `Date` object:
+
+```{r}         
+d 
+```
+
+```{r}          
+as.character(d, format = "%m/%Y") 
+```
+
+```{r           
+as.character(d, "%d") 
+```
+
+```{r           
+as.character(d, "%B") 
+```
+
+```{r           
+as.character(d, "%Y") 
+```
+
+Note that `as.character` consistently returns a `character`, even when the result contains nothing but numbers, as in `"%d"` or `"%Y"`. We can always convert from `character` to `numeric` with `as.numeric` if necessary:
+
+```{r           
+as.numeric(as.character(d, "%Y")) 
+```
+
+#### Arithmetic operations with dates
+Arithmetic operations can be performed on `Date` objects in R, allowing for calculations involving dates and time intervals. Here are some common arithmetic operations that can be applied to `Date` objects:
+
+1. Addition and Subtraction:
+   - Adding/Subtracting Days: You can add or subtract a certain number of days to/from a `Date` object using the `+` and `-` operators. For example:
+```{r}
+     date1 <- as.Date("2023-05-24")
+     date2 <- date1 + 7   # Adds 7 days to date1
+     date3 <- date1 - 3   # Subtracts 3 days from date1
+```
+
+   - Adding/Subtracting Weeks/Months/Years: Similarly, you can add or subtract weeks, months, or years using the same operators. R automatically adjusts the resulting date according to the specified time interval. For example:
+```{r}
+
+     date4 <- date1 + lubridate::weeks(2)   # Adds 2 weeks to date1
+     date5 <- date1 - lubridate::month(6)  # Subtracts 6 months from date1
+     date6 <- date1 + lubridate::years(1)   # Adds 1 year to date1
+```
+
+2. Calculating Time Differences:
+   You can calculate the time difference between two `Date` objects using the `-` operator. The result will be an object of class `difftime`, representing the difference in days. For example:
+```{r}
+   date1 <- as.Date("2023-05-24")
+   date2 <- as.Date("2023-06-01")
+   diff <- date2 - date1   # Calculates the difference in days between date2 and date1
+   diff
+```
+
+3. Comparing Dates:
+   Dates can be compared using comparison operators (`<`, `<=`, `>`, `>=`, `==`, `!=`) to check their relative order. This is useful for sorting or filtering data based on dates. For example:
+```{r}
+   date1 <- as.Date("2023-05-24")
+   date2 <- as.Date("2023-06-01")
+   date1 < date2   # Returns TRUE as date1 is earlier than date2
+```
+
+
+
+#### Arithmetric operation with lubridate package
+
+The *lubridate* package introduces intuitive functions like `ymd()` (year-month-day) for creating Date objects with a specified format. It also provides convenient helper functions such as` weeks()`, `months()`, and `years()` to perform arithmetic operations on dates. These functions enhance readability and simplify the code when working with dates and time intervals.
+
+```{r}
+   library(lubridate)
+```
+
+
+By utilizing the lubridate package, you can handle date arithmetic operations more intuitively and efficiently, making it easier to perform calculations and comparisons involving dates in your R code. Here are examples of arithmetic operations with dates using the `lubridate` package:
+
+1. Addition and Subtraction:
+```{r}
+   
+   date1 <- ymd("2023-05-24")
+   date2 <- date1 + weeks(2)   # Adds 2 weeks to date1
+   date1 - months(6)  # Subtracts 6 months from date1
+```
+
+2. Calculating Time Differences:
+```{r}
+
+   date1 <- ymd("2023-05-24")
+   date2 <- ymd("2023-06-01")
+date2 - date1   # Calculates the difference in days between date2 and date1
+```
+
+3. Comparing Dates:
+```{r}
+
+   date1 <- ymd("2023-05-24")
+   date2 <- ymd("2023-06-01")
+   date1 < date2   # Returns TRUE as date1 is earlier than date2
+```
+
+Finally, the `seq` function, which we are already familiar with, can be used to create a sequence of consecutive dates in R. By specifying the starting date, ending date, and the desired interval, we can generate a sequence of dates.
+
+For example, the following expression creates a sequence of dates from January 1, 2023, to January 10, 2023, with a daily interval:
+
+```{r}
+seq(ymd("2023-01-01"), ymd("2023-01-10"), by = "day")
+```
+
+The output is a sequence of `Date` objects representing consecutive dates from January 1, 2023, to January 10, 2023.
+
+By adjusting the starting and ending dates and specifying a different interval (e.g., "week", "month", "year"), you can generate sequences of dates that suit your specific needs. This can be useful for generating date ranges, creating time-based indices, or iterating over a series of dates for analysis or visualization purposes.
+
+
+
+### Time series
+
+A time series is a sequence of data points collected and recorded over a period of time. In R, time series data can be represented and analyzed using specialized data structures and functions. The two main data structures for handling time series data in R are:
+
+1. **ts (Time Series)**: The `ts` object is a basic data structure in R for representing univariate time series. It is created using the `ts()` function, which takes the data as input and optionally accepts arguments for specifying the frequency and start time of the time series. Here's an example of creating a `ts` object:
+
+```{r}
+data <- c(10, 15, 20, 25, 30)
+ts_data <- ts(data, start = c(2020, 1), frequency = 1)
+ts_data
+```
+In this example, the `ts()` function is used to create a time series object `ts_data` from the numeric vector `data`. The `start` argument specifies the start time of the series (January 2020 in this case), and the `frequency` argument indicates the number of observations per unit of time (1 observation per year).
+
+2. **xts (eXtensible Time Series)**: The `xts` object is a more powerful and flexible data structure for handling time series data in R. It is part of the `xts` package, which extends the functionality of `ts` objects by providing additional features and methods for working with time series data. `xts` objects are created using the `xts()` function, and they can store both univariate and multivariate time series data. Here's an example of creating an `xts` object:
+
+```{r}
+# Load the xts package
+library(xts)
+
+# Create an xts object
+data <- c(10, 15, 20, 25, 30)
+time <- as.Date(c("2020-01-01", "2020-02-01", "2020-03-01", "2020-04-01", "2020-05-01"))
+xts_data <- xts(data, order.by = time)
+xts_data
+```
+In this example, the `xts()` function is used to create an `xts` object `xts_data`. The `data` argument contains the time series data, and the `order.by` argument specifies the corresponding time stamps for each observation.
+
+Both `ts` and `xts` objects offer various methods and functions for analyzing and manipulating time series data in R. These include plotting, statistical analysis, time-based subsetting, aggregation, and more. Time series analysis techniques such as forecasting, seasonal decomposition, and autocorrelation analysis can also be applied to these data structures.
+
+
+Here are a few more examples of working with time series using the `ts` package in R:
+
+1. Creating a Monthly Time Series:
+```{r}
+# Generate monthly time series data
+   
+ts_data <- rnorm(n = 233, mean = 25, sd = 4) |>
+ts(start = c(2004,1), frequency = 12)
+ts_data
+```
+
+2.*Subsetting Time Series Data*
+
+Subsetting time series data involves extracting a portion of the data based on specific criteria, such as a range of dates or a subset of observations. In R, subsetting time series data can be done using various approaches.
+
+```{r}
+   # Subset time series data for a specific period
+subset_data <- ts_data |>
+  window(start = c(2020, 1), end = c(2021, 6))
+subset_data
+```
+
+3. *Plotting Time Series Data*
+
+Plotting time series data is a common task in analyzing and visualizing temporal patterns and trends. In R, there are various packages and functions available for creating plots of time series data. Let's explore two commonly used plotting methods: base R plots and ggplot2 package.
+
+```{r}
+#| label: fig-base
+#| fig-cap: Time series plotted with base-R
+#| echo: false
+#| 
+ts_data |>
+  plot(main = "Time Series Data", xlab = "Time", ylab = "Value")
+```
+
+```{r}
+#| label: fig-ggplot
+#| fig-cap: Time series plotted with ggplot
+#| echo: false
+#| 
+ts_data |> 
+  forecast::autoplot()+
+  ggplot2::labs(title = "Monthly Temperature", x = "Time", y = expression(Temperature~degree*C))
+
+```
+
+4. *Calculating Summary Statistics*:
+When working with time series data, calculating summary statistics often involves considering specific aspects related to the temporal dimension. Here are some common summary statistics for time series data
+
+```{r}
+   # Calculate summary statistics of the time series data
+   summary(ts_data)
+```
+
+5. *Applying Smoothing Techniques*:
+Smoothing techniques are commonly used in time series analysis to reduce noise, identify patterns, and reveal underlying trends in the data. In R, there are several smoothing techniques available that can be applied to time series data. Let's explore some commonly used smoothing techniques and their implementation in R
+
+```{r}
+   # Apply moving average smoothing to the time series data
+   smoothed_data <- filter(ts_data, filter = rep(1/3, 3), sides = 2)
+```
+```{r}
+#| label: fig-filtered
+#| fig-cap: Smoothed time series
+#| echo: false
+#| 
+
+smoothed_data |> 
+  forecast::autoplot()+
+  ggplot2::labs(title = "Monthly Temperature", x = "Time", y = expression(Temperature~degree*C))
+
+```
+
+6. *Decomposing Time Series Components*:
+
+```{r}
+
+   # Decompose the time series data into trend, seasonal, and random components
+   decomposition <- decompose(ts_data)
+   trend <- decomposition$trend
+   seasonal <- decomposition$seasonal
+   random <- decomposition$random
+```
+
+
+### Applying Smoothing Techniques
+Smoothing techniques are commonly used in time series analysis to reduce noise, identify patterns, and reveal underlying trends in the data. In R, there are several smoothing techniques available that can be applied to time series data. Let's explore some commonly used smoothing techniques and their implementation in R:
+
+1. **Moving Average**: The moving average is a simple smoothing technique that calculates the average of a fixed window of observations. It helps to smooth out short-term fluctuations and highlight the overall trend. In R, you can apply the moving average using the `ma()` function from the `forecast` package. For example:
+```R
+   # Apply moving average smoothing
+   smoothed_data <- ma(ts_data, order = 5)  # Moving average with a window of size 5
+```
+
+2. **Exponential Smoothing**: Exponential smoothing is a popular smoothing technique that assigns exponentially decreasing weights to past observations. It places more emphasis on recent observations and is suitable for data with a changing trend. In R, you can apply exponential smoothing using the `ets()` function from the `forecast` package. For example:
+```{r}
+   # Apply exponential smoothing
+smoothed_data <- ts_data |>
+  forecast::ets()
+```
+
+
+```{r}
+#| label: fig-ets
+#| fig-cap: ETS smoothed time series
+#| echo: false
+#| 
+smoothed_data |>
+  plot()
+```
+
+
+
+3. **Loess Smoothing**: Loess smoothing is a non-parametric technique that fits a smooth curve through the data using local weighted regression. It is effective in capturing complex patterns and is particularly useful for data with irregular or nonlinear trends. In R, you can apply loess smoothing using the `loess()` function. For example:
+```{r}
+   # Apply loess smoothing
+   smoothed_data <- loess(ts_data ~ time(ts_data))
+```
+
+```{r}
+#| label: fig-loess
+#| fig-cap: loess smoothed time series
+#| echo: false
+#| 
+smoothed_data |>
+  plot()
+```
+
+
+4. **Spline Smoothing**: Spline smoothing is a flexible technique that fits a piecewise polynomial function to the data. It is useful for capturing both local and global trends in the time series. In R, you can apply spline smoothing using the `smooth.spline()` function. For example:
+
+```{r}
+# Apply spline smoothing
+   smoothed_data <- smooth.spline(time(ts_data), ts_data)
+```
+
+
+```{r}
+#| label: fig-spline
+#| fig-cap: Spline smoothed
+#| echo: false
+#| 
+smoothed_data |>
+  plot()
+```
+
+
+

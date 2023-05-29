@@ -1,0 +1,7 @@
+"0","#data txt and preparation"
+"0","df <-read.csv(""data/GLB.Ts+dSST.csv"",header = TRUE, sep = "","", skip = 1, dec=""."" )[1:13]"
+"0","df <- as.data.frame(sapply(df[1:143,], as.numeric))"
+"0","df_months <- names(df)[2:13]"
+"0","df_years <- df$Year"
+"0","rownames(df) <- df_years"
+"0","df <- df[,2:13]"

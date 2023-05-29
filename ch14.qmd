@@ -1,0 +1,83 @@
+# **\"Climate spiral\" -- Plotting GISS Surface Temperature**
+
+[NASA](https://www.nasa.gov/) has been collecting surface temperature for more than over 100 years, and the GISS Surface Temperature analysis from 1888 onward. It is an estimate of ***global surface temperature change***.
+
+The temperature analysis schema was defined in the late 1970s by James Hansen and the complete analysis and method are documented in [Hansen and Lebedeff (1987)](https://pubs.giss.nasa.gov/abs/ha00700d.html). To put it simply is a method of global temperature change that is used for comparison with one-dimensional global climate models.
+
+### **Data**
+
+The [website](https://data.giss.nasa.gov/gistemp/) (<https://data.giss.nasa.gov/gistemp/> ) offers loads of data and I am using the ***Global-mean monthly, seasonal, and annual means**, 1880-present, updated through most recent month: [TXT](https://data.giss.nasa.gov/gistemp/tabledata_v4/GLB.Ts+dSST.txt), [CSV](https://data.giss.nasa.gov/gistemp/tabledata_v4/GLB.Ts+dSST.csv)*
+
+It need some prior data preparation, namely min and max values, as it is required by radarchart function. but we need to install these packages first
+
+```{r}
+#| eval: false
+devtools::install_github(
+  repo = "ricardo-bion/ggradar",
+  dependencies = TRUE
+  )
+```
+
+
+```{r}
+library(ggradar)
+library(fmsb)
+library(scales)
+library(RColorBrewer)
+```
+
+
+```{r}
+#data txt and preparation
+df <-read.csv("data/GLB.Ts+dSST.csv",header = TRUE, sep = ",", skip = 1, dec="." )[1:13]
+df <- as.data.frame(sapply(df[1:143,], as.numeric))
+df_months <- names(df)[2:13]
+df_years <- df$Year
+rownames(df) <- df_years
+df <- df[,2:13]
+```
+
+
+```{r}
+# adding max min
+max_min <- data.frame(
+  Jan = c(1.4, -0.85), Feb = c(1.4, -0.85), Mar = c(1.4, -0.85),
+  Apr = c(1.4, -0.85), May = c(1.4, -0.85), Jun = c(1.4, -0.85),
+  Jul = c(1.4, -0.85), Aug = c(1.4, -0.85), Sep = c(1.4, -0.85),
+  Oct = c(1.4, -0.85), Nov = c(1.4, -0.85), Dec = c(1.4, -0.85)
+)
+rownames(max_min) <- c("Max", "Min")
+```
+
+
+```{r}
+#merging
+df <- rbind(max_min, df)
+ 
+# Set graphic colors
+nb.cols <- length(df_years)
+mycolors <- colorRampPalette(brewer.pal(8, "Set2"))(nb.cols)
+colors_border <- mycolors  
+colors_in <- alpha(mycolors, 0.3) 
+```
+
+
+### **Data visualisation**
+
+Adding the radarchart and looping through the years:
+```{r}
+for (i in 1:length(df_years)){
+  y <- df_years[1:i]
+  df_tmp <- df[rownames(df)%in%y,1:12]
+  df_tmp <- rbind(max_min, df_tmp)
+  radarchart( df_tmp, maxmin=TRUE, axistype=1,seg=3,vlabels = df_months,
+              plwd=0.5 , plty=1,centerzero=FALSE,caxislabels = c(-1, 0, 1, 1.4),
+              cglcol="grey", cglty=2, axislabcol="black",  
+              vlcex=1.2,
+              title= paste0("GISS Surface temperature for years until ", tail(y,1)) )  
+  legend(x=-0.35, y=0.15, legend = tail(y,1), bty = "n", pch=30 , col=colors_in , text.col ="black", cex=1.3, pt.cex=3)
+}
+```
+
+
+Changes through time stretch from 1888 until 2023. The scale of this radar charts go from -1ºC to 1.4ºC (with 0 and 1 as reference lines).

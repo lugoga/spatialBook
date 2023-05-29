@@ -1,0 +1,749 @@
+# Geometric operations with vector layers
+
+## Aims
+
+Our aims in this chapter are:
+
+-   Learn how to join data to a vector layer, by attributes or by location
+
+-   Learn to make geometric calculations with vector layers
+
+We will use the following R packages:
+
+-   `sf`
+
+-   `units`
+
+## Join by location
+
+For most of the examples in this Chapter, we are going to use the US counties and three airports layers (Section [7.7](https://geobgu.xyz/r-2021/vector-layers.html#reading-vector-layers)):
+
+```         
+library(sf) airports = st_read("airports.geojson") county = st_read("USA_2_GADM_fips.shp")
+```
+
+transformed to the US National Atlas projection (Section [7.9.2](https://geobgu.xyz/r-2021/vector-layers.html#vector-layer-reprojection)):
+
+```         
+airports = st_transform(airports, 2163) county = st_transform(county, 2163)
+```
+
+Join by spatial location, or **spatial join**, is one of the most common operations in spatial analysis. In a spatial join we are \"attaching\" attributes from one layer to another, based on their spatial relations. In ArcGIS this is done using \"Join data from another layer based on spatial location\" Figures [8.1](https://geobgu.xyz/r-2021/geometric-operations-with-vector-layers.html#fig:arcgis-join-by-location1)--[8.2](https://geobgu.xyz/r-2021/geometric-operations-with-vector-layers.html#fig:arcgis-join-by-location2).
+
+Figure 8.1: Join by location in ArcGIS (Step 1)
+
+Figure 8.2: Join by location in ArcGIS (Step 2)
+
+For simplicity, we will create a subset of the counties of New Mexico only, since all three airports are located in that state:
+
+```         
+nm = county[county$NAME_1 == "New Mexico", ]
+```
+
+Figure [8.3](https://geobgu.xyz/r-2021/geometric-operations-with-vector-layers.html#fig:nm-and-airports) shows the geometry of the `nm` and `airports` layers. Note that the `pch` parameter determines point shape (see `?points`), while `cex` determines point size (Section [7.8](https://geobgu.xyz/r-2021/vector-layers.html#sf-basic-plotting)):
+
+```         
+plot(st_geometry(nm)) plot(st_geometry(airports), col = "red", pch = 16, cex = 2, add = TRUE)
+```
+
+Figure 8.3: The `nm` and `airports` layers
+
+Given two layers `x` and `y`, a function call of the form `st_join(x, y)` returns the `x` layer along with *matching attributes* from `y`. The default join type is by **intersection**, meaning that two geometries are considered matching if they intersect. Other join types can be specified using the `join` parameter (see `?st_join`).
+
+For example, the following expression joins the `airports` layer with the matching `nm` attributes. The resulting layer contains all three airports with their original geometry and `name` attribute, plus the `NAME_1`, `NAME_2`, `TYPE_2` and `FIPS` of the `nm` feature that each airport intersects with:
+
+```         
+st_join(airports, nm) ## Simple feature collection with 3 features and 5 fields ## Geometry type: POINT ## Dimension:     XY ## Bounding box:  xmin: -619184.5 ymin: -1081605 xmax: -551689.8 ymax: -1022366 ## Projected CRS: US National Atlas Equal Area ##                        name     NAME_1     NAME_2 TYPE_2  FIPS ## 1 Albuquerque International New Mexico Bernalillo County 35001 ## 2           Double Eagle II New Mexico Bernalillo County 35001 ## 3        Santa Fe Municipal New Mexico   Santa Fe County 35049 ##                     geometry ## 1 POINT (-603868.2 -1081605) ## 2 POINT (-619184.5 -1068431) ## 3 POINT (-551689.8 -1022366)
+```
+
+> What do you think will happen if we reverse the order of the arguments, as in `st_join(nm, airports)`? How many features is the result going to have, and why?
+
+## Subsetting by location
+
+In Section [7.6](https://geobgu.xyz/r-2021/vector-layers.html#subsetting-based-on-attributes) we learned how to subset `sf` vector layers based on their attributes, just like an ordinary `data.frame` (Section [4.1.5](https://geobgu.xyz/r-2021/tables-conditionals-and-loops.html#data-frame-subsetting)). We can also subset an `sf` layer based on its intersection with another layer. Subsetting by location uses the same `[` operator, only using a layer as the \"index.\" Namely, an expression of the form `x[y, ]`---where `x` and `y` are vector layers---returns a subset of `x` features that *intersect* with `y`.
+
+For example, the following expression returns only those `nm` counties that intersect with the `airports` layer:
+
+```         
+nm1 = nm[airports, ]
+```
+
+The subset is shown in light blue in Figure [8.4](https://geobgu.xyz/r-2021/geometric-operations-with-vector-layers.html#fig:nm-subset):
+
+```         
+plot(st_geometry(nm)) plot(st_geometry(nm1), col = "lightblue", add = TRUE) plot(st_geometry(airports), col = "red", pch = 16, cex = 2, add = TRUE)
+```
+
+Figure 8.4: Subset of the `nm` layer based on intersection with `airports`
+
+> What will be the result of `airports[nm, ]`?
+
+> What will be the result of `nm[nm[20, ], ]`?
+
+## Geometric calculations
+
+### Introduction
+
+**Geometric operations** on vector layers can conceptually be divided into three groups, according to their output:
+
+-   **Numeric** values (Section [8.3.2](https://geobgu.xyz/r-2021/geometric-operations-with-vector-layers.html#numeric-geometric-calculations))---Functions that summarize geometrical properties of:
+
+    -   A *single* layer---e.g., area, length (Section [8.3.2.2](https://geobgu.xyz/r-2021/geometric-operations-with-vector-layers.html#area))
+
+    -   A *pair* of layers---e.g., distance (Section [8.3.2.3](https://geobgu.xyz/r-2021/geometric-operations-with-vector-layers.html#distance))
+
+-   **Logical** values (Section [8.3.3](https://geobgu.xyz/r-2021/geometric-operations-with-vector-layers.html#logical-geometric-calculations))---Functions that evaluate whether a certain condition holds true, regarding:
+
+    -   A *single* layer---e.g., geometry is valid
+
+    -   A *pair* of layers---e.g., feature A intersects feature B (Section [8.3.3](https://geobgu.xyz/r-2021/geometric-operations-with-vector-layers.html#logical-geometric-calculations))
+
+-   **Spatial** layers (Section [8.3.4](https://geobgu.xyz/r-2021/geometric-operations-with-vector-layers.html#spatial-geometric-calculations))---Functions that create a new layer based on:
+
+    -   A *single* layer---e.g., centroid, buffer (Sections [8.3.4.2](https://geobgu.xyz/r-2021/geometric-operations-with-vector-layers.html#centroids), [8.3.4.4](https://geobgu.xyz/r-2021/geometric-operations-with-vector-layers.html#geometry-casting), [8.3.4.5](https://geobgu.xyz/r-2021/geometric-operations-with-vector-layers.html#buffers), [8.3.4.7](https://geobgu.xyz/r-2021/geometric-operations-with-vector-layers.html#convex-hull))
+
+    -   A *pair* of layers---e.g., intersection area (Section [8.3.4.6](https://geobgu.xyz/r-2021/geometric-operations-with-vector-layers.html#geometry-generation-from-pairs))
+
+The following three sections elaborate and give examples of numeric (Section [8.3.2](https://geobgu.xyz/r-2021/geometric-operations-with-vector-layers.html#numeric-geometric-calculations)), logical (Section [8.3.3](https://geobgu.xyz/r-2021/geometric-operations-with-vector-layers.html#logical-geometric-calculations)) and spatial (Section [8.3.4](https://geobgu.xyz/r-2021/geometric-operations-with-vector-layers.html#spatial-geometric-calculations)) geometric calculations on vector layers.
+
+### Numeric geometric calculations
+
+#### Introduction
+
+There are several functions to calculate numeric geometric properties of vector layers in package `sf`:
+
+-   `st_bbox`---Section [7.5.2](https://geobgu.xyz/r-2021/vector-layers.html#sf-spatial-properties)
+
+-   `st_area`---Section [8.3.2.2](https://geobgu.xyz/r-2021/geometric-operations-with-vector-layers.html#area)
+
+-   `st_distance`---Section [8.3.2.3](https://geobgu.xyz/r-2021/geometric-operations-with-vector-layers.html#distance)
+
+-   `st_length`---Section [11.4.6](https://geobgu.xyz/r-2021/processing-spatio-temporal-data.html#trajectory-length)
+
+-   `st_dimension`
+
+Functions `st_bbox`, `st_area`, `st_length` and `st_dimension` are operation applicable for individual geometries. The `st_distance` function is applicable to *pairs* of geometries. The next two sections give an example from each category: `st_area` for individual geometries (Section [8.3.2.2](https://geobgu.xyz/r-2021/geometric-operations-with-vector-layers.html#area)) and `st_distance` for pairs of geometries (Section [8.3.2.3](https://geobgu.xyz/r-2021/geometric-operations-with-vector-layers.html#distance)).
+
+#### Area
+
+The `st_area` function returns the *area* of each feature or geometry. For example, we can use `st_area` to calculate the area of each feature in the `county` layer (i.e., each county):
+
+```         
+county$area = st_area(county) county$area[1:6] ## Units: [m^2] ## [1]  2451875694  1941109814  1077788608  1350475635 16416571545  2626706989
+```
+
+The result is an object of class `units`, which is basically a numeric vector associated with the *units* of measurement:
+
+```         
+class(county$area) ## [1] "units"
+```
+
+**CRS units** (e.g., meters) are used by default in length, area and distance calculations. For example, the units of measurement in the US National Atlas CRS are *meters*, which is why the area values are returned in m2�2 units.
+
+We can convert `units` objects to different units, with `set_units` from package `units`^[29](https://geobgu.xyz/r-2021/geometric-operations-with-vector-layers.html#fn29)^. Note that the `units` package needs to be loaded to do that. For example, here is how we can convert the `area` column from m2�2 to km2��2:
+
+```         
+library(units) county$area = set_units(county$area, "km^2") county$area[1:6] ## Units: [km^2] ## [1]  2451.876  1941.110  1077.789  1350.476 16416.572  2626.707
+```
+
+Dealing with `units`, rather than `numeric` values has several advantages:
+
+-   We don\'t need to remember the coefficients for conversion between one unit to another, avoiding conversion mistakes.
+
+-   We don\'t need to remember, or somehow encode, the units of measurement (e.g., rename the area column to `area_m2`) since they are already binded with the values.
+
+-   We can keep track of the units when making numeric calculations. For example, if we divide a numeric value by km2��2, the result is going to be associated with units of density, km−2��−2 (Section [8.5](https://geobgu.xyz/r-2021/geometric-operations-with-vector-layers.html#join-by-attributes)).
+
+Nevertheless, if necessary, we can always convert `units` to an ordinary `numeric` vector with `as.numeric`:
+
+```         
+as.numeric(county$area[1:6]) ## [1]  2451.876  1941.110  1077.789  1350.476 16416.572  2626.707
+```
+
+The calculated county `area` attribute values are visualized in Figure [8.5](https://geobgu.xyz/r-2021/geometric-operations-with-vector-layers.html#fig:county-area):
+
+```         
+plot(county[, "area"])
+```
+
+Figure 8.5: Calculated `area` attribute
+
+#### Distance
+
+An example of a numeric operator on a *pair* of geometries is **geographical distance**. Distances can be calculated using function `st_distance`. For example, the following expression calculates the distance between each feature in `airports` and each feature in `nm`:
+
+```         
+d = st_distance(airports, nm)
+```
+
+The result is a `matrix` of `units` values:
+
+```         
+d[, 1:6] ## Units: [m] ##          [,1]     [,2]      [,3]      [,4]      [,5]      [,6] ## [1,] 266778.9 140470.5 103328.22 140913.62 175353.34 121934.94 ## [2,] 275925.0 120879.9  93753.25 141511.80 177624.40 125327.45 ## [3,] 197540.4 145580.9  34956.53  62231.01  96549.17  43630.68
+```
+
+In the distance matrix resulting from `st_distance(x,y)`:
+
+-   *Rows* refer to features of `x`, e.g., `airports`
+
+-   *Columns* refer to features of `y`, e.g., `nm`
+
+Therefore, the matrix dimensions are equal to `c(nrow(x), nrow(y))`:
+
+```         
+c(nrow(airports), nrow(nm)) ## [1]  3 33
+```
+
+```         
+dim(d) ## [1]  3 33
+```
+
+Just like areas (Section [8.3.2.2](https://geobgu.xyz/r-2021/geometric-operations-with-vector-layers.html#area)), distances can be converted to different units with `set_units`. For example, the following expression converts the distance matrix `d` from m� to km��:
+
+```         
+d = set_units(d, "km") d[, 1:6] ## Units: [km] ##          [,1]     [,2]      [,3]      [,4]      [,5]      [,6] ## [1,] 266.7789 140.4705 103.32822 140.91362 175.35334 121.93494 ## [2,] 275.9250 120.8799  93.75325 141.51180 177.62440 125.32745 ## [3,] 197.5404 145.5809  34.95653  62.23101  96.54917  43.63068
+```
+
+To work with the distance `matrix`, it can be convenient to set row and column names. We can use any of the unique attributes of `x` and `y`, such as airport names and county names:
+
+```         
+rownames(d) = airports$name colnames(d) = nm$NAME_2 d[, 1:6] ## Units: [km] ##                              Union San Juan Rio Arriba      Taos    Colfax ## Albuquerque International 266.7789 140.4705  103.32822 140.91362 175.35334 ## Double Eagle II           275.9250 120.8799   93.75325 141.51180 177.62440 ## Santa Fe Municipal        197.5404 145.5809   34.95653  62.23101  96.54917 ##                                Mora ## Albuquerque International 121.93494 ## Double Eagle II           125.32745 ## Santa Fe Municipal         43.63068
+```
+
+Once row and column names are set, it is more convenient to find out the distance between a *specific* airport and a *specific* county:
+
+```         
+d["Santa Fe Municipal", "Santa Fe", drop = FALSE] ## Units: [km] ##                    Santa Fe ## Santa Fe Municipal        0
+```
+
+### Logical geometric calculations
+
+Given two sets of geometries, or layers, `x` and `y`, the following logical geometric functions check whether each of the geometries in `x` maintains the specified [relation](https://en.wikipedia.org/wiki/DE-9IM#Spatial_predicates) with each of the geometries in `y`:
+
+-   `st_contains_properly`
+
+-   `st_contains`
+
+-   `st_covered_by`
+
+-   `st_covers`
+
+-   `st_crosses`
+
+-   `st_disjoint`
+
+-   `st_equals_exact`
+
+-   `st_equals`
+
+-   `st_intersects`
+
+-   `st_is_within_distance`
+
+-   `st_overlaps`
+
+-   `st_touches`
+
+-   `st_within`
+
+In this book we mostly use the first function in the above list, `st_intersects`. The `st_intersects` function detects intersection, which is the simplest and most useful type of relation. Two geometries *intersect* when they share at least one point in common. However, it is important to be aware of the many other relations that can be evaluated using the other 12 functions.
+
+By default, the above functions return a `list`, which takes less memory but is less convenient to work with. When specifying `sparse=FALSE` the functions return a logical `matrix` which is more convenient to work with. Each element `i,j` in the matrix is `TRUE` when `f(x[i], y[j])` is `TRUE`. For example, the following expression creates a matrix of *intersection* relations between counties in `nm`:
+
+```         
+int = st_intersects(nm, nm, sparse = FALSE) int[1:4, 1:4] ##       [,1]  [,2]  [,3]  [,4] ## [1,]  TRUE FALSE FALSE FALSE ## [2,] FALSE  TRUE  TRUE FALSE ## [3,] FALSE  TRUE  TRUE  TRUE ## [4,] FALSE FALSE  TRUE  TRUE
+```
+
+Figure [8.6](https://geobgu.xyz/r-2021/geometric-operations-with-vector-layers.html#fig:spatial-realations-matrix) shows two matrices of spatial relations between counties in New Mexico: `st_intersects` (left) and `st_touches` (right).
+
+Figure 8.6: Spatial relations between counties in New Mexico, `st_intersects` (left) and `st_touches` (right)
+
+> How can we calculate `airports` count per county in `nm`, using `st_intersects` (Figure [8.7](https://geobgu.xyz/r-2021/geometric-operations-with-vector-layers.html#fig:nm-airport-count))?
+
+Figure 8.7: Airport count per county in New Mexico
+
+### Spatial geometric calculations
+
+#### Introduction
+
+The `sf` package provides common *geometry-generating* functions applicable to *individual* geometries, such as:
+
+-   `st_centroid`---Section [8.3.4.2](https://geobgu.xyz/r-2021/geometric-operations-with-vector-layers.html#centroids)
+
+-   `st_buffer`---Section [8.3.4.5](https://geobgu.xyz/r-2021/geometric-operations-with-vector-layers.html#buffers)
+
+-   `st_convex_hull`---Section [8.3.4.7](https://geobgu.xyz/r-2021/geometric-operations-with-vector-layers.html#convex-hull)
+
+-   `st_voronoi`
+
+-   `st_sample`
+
+What each function does is illustrated in Figure [8.8](https://geobgu.xyz/r-2021/geometric-operations-with-vector-layers.html#fig:sf-geometry-generating-functions).
+
+Figure 8.8: Geometry-generating operations on individual layers. The input geometries are shown in red, the output geometries are shown in black.
+
+Additionally, the `st_cast` function is used to transform geometries from one type to another (Figure [7.6](https://geobgu.xyz/r-2021/vector-layers.html#fig:geometry-types)), which can also be considred as geometry generation (Section [8.3.4.4](https://geobgu.xyz/r-2021/geometric-operations-with-vector-layers.html#geometry-casting)). The `st_union` and `st_combine` functions are used to combine multiple geometries into one, possibly dissolving their borders (Section [8.3.4.3](https://geobgu.xyz/r-2021/geometric-operations-with-vector-layers.html#combining-and-dissolving)).
+
+Finally, geometry-generating functions which operate on *pairs* of geometries (Section [8.3.4.6](https://geobgu.xyz/r-2021/geometric-operations-with-vector-layers.html#geometry-generation-from-pairs)) include:
+
+-   `st_intersection`
+
+-   `st_difference`
+
+-   `st_sym_difference`
+
+-   `st_union`
+
+We elaborate on these functions in the following Sections [8.3.4.2](https://geobgu.xyz/r-2021/geometric-operations-with-vector-layers.html#centroids)--[8.3.4.7](https://geobgu.xyz/r-2021/geometric-operations-with-vector-layers.html#convex-hull).
+
+#### Centroids
+
+A **centroid** is the geometric center of a geometry, i.e., its center of mass, represented as a point. For example, the following expression uses `st_centroid` to create the centroid of each polygon in `county`:
+
+```         
+ctr = st_centroid(nm)
+```
+
+The `nm` layer along with the calculated centroids is shown in Figure [8.9](https://geobgu.xyz/r-2021/geometric-operations-with-vector-layers.html#fig:nm-centroids):
+
+```         
+plot(st_geometry(nm), border = "grey") plot(st_geometry(ctr), col = "red", pch = 3, add = TRUE)
+```
+
+Figure 8.9: Centroids of New Mexico counties
+
+#### Combining and dissolving
+
+The `st_combine` and `st_union` functions can be used to combine multiple geometries into a single one. The difference is that `st_combine` only combines the geometries into one, just like the `c` function combines `sfg` objects into one `sfg` (Section [7.2.2](https://geobgu.xyz/r-2021/vector-layers.html#geometry-sfg)), while `st_union` also dissolves internal borders.
+
+To understand the difference between `st_combine` and `st_union`, let\'s examine the result of applying each of them on `nm`:
+
+```         
+st_combine(nm) ## Geometry set for 1 feature  ## Geometry type: MULTIPOLYGON ## Dimension:     XY ## Bounding box:  xmin: -863763.9 ymin: -1478601 xmax: -267074.1 ymax: -845634.3 ## Projected CRS: US National Atlas Equal Area ## MULTIPOLYGON (((-267074.1 -884175.1, -267309.2 ...
+```
+
+```         
+st_union(nm) ## Geometry set for 1 feature  ## Geometry type: POLYGON ## Dimension:     XY ## Bounding box:  xmin: -863763.9 ymin: -1478601 xmax: -267074.1 ymax: -845634.3 ## Projected CRS: US National Atlas Equal Area ## POLYGON ((-852411.9 -1350402, -850603.1 -133127...
+```
+
+The results are plotted in Figure [8.10](https://geobgu.xyz/r-2021/geometric-operations-with-vector-layers.html#fig:combine-union):
+
+```         
+plot(st_combine(nm), main = "st_combine(nm)") plot(st_union(nm), main = "st_union(nm)")
+```
+
+Figure 8.10: Combining (`st_combine`) and dissolving (`st_union`) polygons
+
+> What is the class of the resulting objects? Why? What happened to the original `nm` attributes?
+
+> Why did `st_combine` return a `MULTIPOLYGON`, while `st_union` returned a `POLYGON`?
+
+> Why do you think there are internal \"patches\" in the result of `st_union(nm)` (Figure [8.10](https://geobgu.xyz/r-2021/geometric-operations-with-vector-layers.html#fig:combine-union))^[30](https://geobgu.xyz/r-2021/geometric-operations-with-vector-layers.html#fn30)^?
+
+Let\'s solve a geometric question to practice some of the functions we learned so far. What is the distance between the centroids of California and New Jersey, in kilometers? Using `[`, `st_union`, `st_centroid` and `st_distance`, we can calculate the distance as follows:
+
+```         
+# Subsetting ca = county[county$NAME_1 == "California", ] nj = county[county$NAME_1 == "New Jersey", ]  # Union ca = st_union(ca) nj = st_union(nj)  # Calculating centroids ca_ctr = st_centroid(ca) nj_ctr = st_centroid(nj)  # Calculating distance d = st_distance(ca_ctr, nj_ctr)  # Converting to km set_units(d, "km") ## Units: [km] ##         [,1] ## [1,] 3846.64
+```
+
+Note that we are using `st_union` to combine the *county* polygons into a single geometry, so that we can calculate the centroid of the *state* polygon, as a whole.
+
+To plot the centroids more conveniently, we can use the `c` function to combine two `sfc` (geometry columns) into one, long, geometry column. Recall that this is unlike what the `c` function does when given `sfg` (geometries), in which case the geometries are combined to one (multi- or collection) geometry (Section [7.2.2](https://geobgu.xyz/r-2021/vector-layers.html#geometry-sfg)).
+
+```         
+p = c(ca_ctr, nj_ctr) p ## Geometry set for 2 features  ## Geometry type: POINT ## Dimension:     XY ## Bounding box:  xmin: -1707694 ymin: -667480.7 xmax: 2111204 ymax: -206332.8 ## Projected CRS: US National Atlas Equal Area ## POINT (-1707694 -667480.7) ## POINT (2111204 -206332.8)
+```
+
+The centroids we calculated can be displayed as follows (Figure [8.11](https://geobgu.xyz/r-2021/geometric-operations-with-vector-layers.html#fig:ca-nj-centroids)):
+
+```         
+plot(st_geometry(county), border = "grey") plot(p, col = "red", pch = 16, cex = 2, add = TRUE)
+```
+
+Figure 8.11: California and New Jersey centroids
+
+How can we draw a line line between the centroids, corresponding to the distance we just calculated (Figure [8.12](https://geobgu.xyz/r-2021/geometric-operations-with-vector-layers.html#fig:ca-nj-line))?
+
+First, we can use `st_combine` to transform the points into a single `MULTIPOINT` geometry. Remember, the `st_combine` function is similar to `st_union`, but only combines and *does not dissolve*.
+
+```         
+p = st_combine(p) p ## Geometry set for 1 feature  ## Geometry type: MULTIPOINT ## Dimension:     XY ## Bounding box:  xmin: -1707694 ymin: -667480.7 xmax: 2111204 ymax: -206332.8 ## Projected CRS: US National Atlas Equal Area ## MULTIPOINT ((-1707694 -667480.7), (2111204 -206...
+```
+
+> Do you think the results of `st_union(p)` and `st_combine(p)` will be different, and if so in what way?
+
+What is left to be done is to transform the `MULTIPOINT` geometry to a `LINESTRING` geometry, which is what we learn next (Section [8.3.4.4](https://geobgu.xyz/r-2021/geometric-operations-with-vector-layers.html#geometry-casting)).
+
+#### Geometry casting
+
+Sometimes we need to convert a given geometry to a different *type*, to express different aspects of the geometries in our analysis. For example, we would have to convert the county `MULTIPOLYGON` geometries to `MULTILINESTRING` geometries to calculate the perimeter of each county, using `st_length` (Section [8.3.2](https://geobgu.xyz/r-2021/geometric-operations-with-vector-layers.html#numeric-geometric-calculations)).
+
+The `st_cast` function can be used to convert between different geometry types. The `st_cast` function accepts:
+
+-   The input `sfg`, `sfc` or `sf`
+
+-   The target geometry *type*
+
+For example, we can use `st_cast` to convert our `MULTIPOINT` geometry `p` (Figure [8.11](https://geobgu.xyz/r-2021/geometric-operations-with-vector-layers.html#fig:ca-nj-centroids)), which we calculated in Section [8.3.4.3](https://geobgu.xyz/r-2021/geometric-operations-with-vector-layers.html#combining-and-dissolving), to a `LINESTRING` geometry `l`:
+
+```         
+l = st_cast(p, "LINESTRING") l ## Geometry set for 1 feature  ## Geometry type: LINESTRING ## Dimension:     XY ## Bounding box:  xmin: -1707694 ymin: -667480.7 xmax: 2111204 ymax: -206332.8 ## Projected CRS: US National Atlas Equal Area ## LINESTRING (-1707694 -667480.7, 2111204 -206332.8)
+```
+
+Each `MULTIPOINT` geometry is replaced with a `LINESTRING` geometry, comprising a line that goes through all points from first to last. In this case, `p` contains just one `MULTIPOINT` geometry that contains two points. Therefore, the resulting geometry column `l` contains one `LINESTRING` geometry with a straight line.
+
+The line we calculated is shown in Figure [8.12](https://geobgu.xyz/r-2021/geometric-operations-with-vector-layers.html#fig:ca-nj-line):
+
+```         
+plot(st_geometry(county), border = "grey") plot(st_geometry(ca_ctr), col = "red", pch = 16, cex = 2, add = TRUE) plot(st_geometry(nj_ctr), col = "red", pch = 16, cex = 2, add = TRUE) plot(l, col = "red", add = TRUE)
+```
+
+Figure 8.12: California and New Jersey centroids, with a line
+
+It is worth mentioning that not every conversion operation between geometry types is possible. Meaningless `st_cast` operations will fail with an error message. For example, a `LINESTRING` composed of just two points cannot be converted to a `POLYGON`:
+
+```         
+st_cast(l, "POLYGON") ## Error in FUN(X[[i]], ...): polygons require at least 4 points
+```
+
+#### Buffers
+
+Another example of a function that generates new geometries based on individual input geometries is `st_buffer`. The `st_buffer` function calculates **buffers**, polygons encompassing all point up to the specified distance from a given geometry.
+
+For example, here is how we can calculate 100 km�� buffers around the `airports`. Note that the `st_buffer` requires buffer distance (`dist`), which can be passed as `numeric`, in which case CRS units are assumed, or as `units`, in which case we can use any distance unit we wish. The following two expressions are equivalent, in both cases resulting in a layer of 100 km�� buffers named `airports_100`:
+
+```         
+# Buffer distance as 'numeric' airports_100 = st_buffer(airports, dist = 100 * 10^3)
+```
+
+```         
+# Buffer distance as 'units' airports_100 = st_buffer(airports, dist = set_units(100, "km"))
+```
+
+The `airports_100` layer with the airport buffers is shown in Figure [8.13](https://geobgu.xyz/r-2021/geometric-operations-with-vector-layers.html#fig:airport-buffers):
+
+```         
+plot(st_geometry(nm)) plot(st_geometry(airports_100), add = TRUE)
+```
+
+Figure 8.13: `airports` buffered by 100 km
+
+#### Geometry generation from pairs
+
+In addition to geometry-generating functions that operate on individual geometries, such as `st_centroid` (Section [8.3.4.2](https://geobgu.xyz/r-2021/geometric-operations-with-vector-layers.html#centroids)) and `st_buffer` (Section [8.3.4.5](https://geobgu.xyz/r-2021/geometric-operations-with-vector-layers.html#buffers)), there are four geometry-generating functions that operate on *pairs* of input geometries. These are:
+
+-   `st_intersection`
+
+-   `st_difference`
+
+-   `st_sym_difference`
+
+-   `st_union`
+
+Figure [8.14](https://geobgu.xyz/r-2021/geometric-operations-with-vector-layers.html#fig:geometry-generating-pairs) shows what each of these four functions does. Note that `st_intersection`, `st_sym_difference`, `st_union` are *symmetrical* meaning that the order of the two inputs `x` and `y` does not matter. The `st_difference` function is not symmetrical: it returns the area of `x`, minus the intersection of `x` and `y`.
+
+Figure 8.14: Geometry-generating operations on pairs of layers
+
+For example, suppose that we need to calculate the area that is within 100 km�� range of *all* three airports at the same time? We can find the area of intersection of the three airports, using `st_intersection`. Since `st_intersection` accepts two geometries at a time, this can be done in two steps:
+
+```         
+inter1 = st_intersection(airports_100[1, ], airports_100[2, ]) inter2 = st_intersection(inter1, airports_100[3, ])
+```
+
+The resulting polygon `inter2` is shown, in blue, in Figure [8.15](https://geobgu.xyz/r-2021/geometric-operations-with-vector-layers.html#fig:airports-buffer-intersection):
+
+```         
+plot(st_geometry(nm)) plot(st_geometry(airports_100), add = TRUE) plot(inter2, col = "lightblue", add = TRUE)
+```
+
+Figure 8.15: The intersection of three `airports` buffers
+
+How can we calculate the area that is within 100 km�� range of *at least one* of the three airports? We can use exactly the same technique, only replacing `st_intersection` with `st_union`, as follows:
+
+```         
+union1 = st_union(airports_100[1, ], airports_100[2, ]) union2 = st_union(union1, airports_100[3, ])
+```
+
+As shown in Section [8.3.4.3](https://geobgu.xyz/r-2021/geometric-operations-with-vector-layers.html#combining-and-dissolving), `st_union` can be applied on an individual layer, in which case it returns the (dissolved) union of all geometries. Therefore we can get to the same result with just one expression, as follows:
+
+```         
+union2 = st_union(airports_100)
+```
+
+The resulting polygon `union2` is shown, in blue, in Figure [8.16](https://geobgu.xyz/r-2021/geometric-operations-with-vector-layers.html#fig:airports-buffer-union):
+
+```         
+plot(st_geometry(nm)) plot(union2, col = "lightblue", add = TRUE)
+```
+
+Figure 8.16: The union of three `airports` buffers
+
+#### Convex hull
+
+The **Convex Hull** of a set X� of points is the smallest convex polygon that contains X�. The convex hull may be visualized as the shape resulting when stretching a rubber band around X�, then releasing it until it shrinks to minimal size (Figure [8.17](https://geobgu.xyz/r-2021/geometric-operations-with-vector-layers.html#fig:convex-hull)).
+
+Figure 8.17: Convex Hull: elastic-band analogy (<https://en.wikipedia.org/wiki/Convex_hull>)
+
+The `st_convex_hull` function is used to calculate the convex hull of the given geometry or geometries. For example, the following expression calculates the convex hull (per feature) in `nm1`:
+
+```         
+h = st_convex_hull(nm1)
+```
+
+The resulting layer is shown in red in Figure [8.18](https://geobgu.xyz/r-2021/geometric-operations-with-vector-layers.html#fig:nm1-convex-hull):
+
+```         
+plot(st_geometry(nm1)) plot(st_geometry(h), add = TRUE, border = "red")
+```
+
+Figure 8.18: Convex hull polygons for two counties in New Mexico
+
+> How can we calculate the convex hull of *all* polygons in `nm1` (Figure [8.19](https://geobgu.xyz/r-2021/geometric-operations-with-vector-layers.html#fig:nm1-convex-hull-union))?
+
+Figure 8.19: Convex Hull of multiple polygons
+
+Here is another question to practice the geometric operations we learned in this chapter. Suppose we build a tunnel, 10 km�� wide, between the centroids of `"Harding"` and `"Sierra"` counties in New Mexico. Which counties does the tunnel go through? The following code gives the result. Take a moment to go over it and make sure you understand what happens in each step:
+
+```         
+w = nm[nm$NAME_2 %in% c("Harding", "Sierra"), ] w_ctr = st_centroid(w) w_ctr_buf = st_buffer(w_ctr, dist = 5000) w_ctr_buf_u = st_combine(w_ctr_buf) w_ctr_buf_u_ch = st_convex_hull(w_ctr_buf_u) nm_w = nm[w_ctr_buf_u_ch, ] nm_w$NAME_2 ## [1] "Harding"    "San Miguel" "Guadalupe"  "Torrance"   "Socorro"    ## [6] "Lincoln"    "Sierra"
+```
+
+Figure [8.20](https://geobgu.xyz/r-2021/geometric-operations-with-vector-layers.html#fig:tunnel-counties) shows the calculated tunnel geometry and highlights the counties that the tunnel goes through. The 4^th^ expression uses the `text` function to draw text labels. The `text` function accepts the `matrix` of coordinates, where labels should be drawn (in this case, county centroid coordinates), and the corresponding `character` vector of lables. In this case, the labels are county names (`nm_w$NAME_2`). (Note that in case the labels are `numeric`, such as in Figure [8.7](https://geobgu.xyz/r-2021/geometric-operations-with-vector-layers.html#fig:nm-airport-count), then we must convert them to `character` using `as.character` for them to be displayed using the `text` function.)
+
+```         
+plot(st_geometry(nm_w), border = NA, col = "lightblue") plot(st_geometry(nm), add = TRUE) plot(st_geometry(w_ctr_buf_u_ch), add = TRUE) text(st_coordinates(st_centroid(nm_w)), nm_w$NAME_2)
+```
+
+Figure 8.20: Tunnel between \"Sierra\" and \"Harding\" county centroids
+
+How is the area of the \"tunnel\" divided between the various counties that it crosses? We can use `st_intersection` (Section [8.3.4.6](https://geobgu.xyz/r-2021/geometric-operations-with-vector-layers.html#geometry-generation-from-pairs)) to calculate all intersections between the tunnel polygon `w_ctr_buf_u_ch`, and the county polygons `nm_w`. Since we already know that the tunnel (`w_ctr_buf_u_ch`) intersects with each of the seven polygons in `nm_w`, the result of the intersection is of the same length, and in the same order, as the corresponding geometries in `nm_w`:
+
+```         
+int = st_intersection(w_ctr_buf_u_ch, nm_w) int ## Geometry set for 7 features  ## Geometry type: POLYGON ## Dimension:     XY ## Bounding box:  xmin: -677075.1 ymin: -1293982 xmax: -340138.8 ymax: -1002634 ## Projected CRS: US National Atlas Equal Area ## First 5 geometries: ## POLYGON ((-359510.4 -1013406, -348484.4 -100391... ## POLYGON ((-430575.6 -1074562, -359510.4 -101340... ## POLYGON ((-484643 -1121091, -430575.6 -1074562,... ## POLYGON ((-545452.3 -1173421, -484643 -1121091,... ## POLYGON ((-638440.3 -1253443, -546193.4 -117405...
+```
+
+Therefore, we can divide the area (Section [8.3.2.2](https://geobgu.xyz/r-2021/geometric-operations-with-vector-layers.html#area)) of each county *intersection*, by the total area of the tunnel, to get the proportion of tunnel area in each county:
+
+```         
+area = st_area(int) area ## Units: [m^2] ## [1]  199064581  872145769  813577715  702562404 1119738156  108077571  575538789
+```
+
+```         
+prop = area / sum(area) prop ## Units: [1] ## [1] 0.04533773 0.19863456 0.18529546 0.16001130 0.25502469 0.02461508 0.13108118
+```
+
+The proportions can be displayed as text labels, using the `text` function (Figure [8.21](https://geobgu.xyz/r-2021/geometric-operations-with-vector-layers.html#fig:tunnel-counties-prop)):
+
+```         
+plot(st_geometry(nm_w), border = "darkgrey") plot(int, col = hcl.colors(7, "Set3"), border = "grey", add = TRUE) text(st_coordinates(st_centroid(int)), paste0(round(prop, 2)*100, "%"))
+```
+
+Figure 8.21: Proportion of tunnel area within each county
+
+## Vector layer aggregation
+
+We don\'t always want to dissolve *all* features into a single geometry (Section [8.3.4.3](https://geobgu.xyz/r-2021/geometric-operations-with-vector-layers.html#combining-and-dissolving)). Sometimes, we need to dissolve each group of geometries, whereas groups are specified by *attribute* or by *location*. To demonstrate dissolving by attribute, also known as aggregation, let\'s take a subset of `county` with the counties of just Arizona and Utah states:
+
+```         
+s = county[county$NAME_1 %in% c("Arizona", "Utah"), ]
+```
+
+The selected counties are shown in Figure [8.22](https://geobgu.xyz/r-2021/geometric-operations-with-vector-layers.html#fig:arizona-utah):
+
+```         
+plot(s[, "NAME_1"], key.width = lcm(3))
+```
+
+Figure 8.22: Subset of two states from `county`
+
+As shown previously (Section [8.3.4.3](https://geobgu.xyz/r-2021/geometric-operations-with-vector-layers.html#combining-and-dissolving)), we can dissolve all features into a single geometry with `st_union`:
+
+```         
+s1 = st_union(s) s1 ## Geometry set for 1 feature  ## Geometry type: POLYGON ## Dimension:     XY ## Bounding box:  xmin: -1389076 ymin: -1470784 xmax: -757960.3 ymax: -235145.7 ## Projected CRS: US National Atlas Equal Area ## POLYGON ((-852411.9 -1350402, -852611 -1352512,...
+```
+
+The dissolved geometry is shown in Figure [8.23](https://geobgu.xyz/r-2021/geometric-operations-with-vector-layers.html#fig:arizona-utah-union):
+
+```         
+plot(s1)
+```
+
+Figure 8.23: Union of all counties in `s`
+
+Aggregating/dissolving *by attributes* can be done with `aggregate`^[31](https://geobgu.xyz/r-2021/geometric-operations-with-vector-layers.html#fn31)^, which accepts the following arguments:
+
+-   `x`---The `sf` layer being dissolved
+
+-   `by`---A corresponding `data.frame` determining the groups
+
+-   `FUN`---The function to be applied on each attribute in `x`
+
+For example, the following expression dissolves the layer `s`, summing the `area` attribute, *by state*:
+
+```         
+s2 = aggregate(s[, "area"], st_drop_geometry(s[, "NAME_1"]), sum) s2 ## Simple feature collection with 2 features and 2 fields ## Attribute-geometry relationship: 0 constant, 1 aggregate, 1 identity ## Geometry type: POLYGON ## Dimension:     XY ## Bounding box:  xmin: -1389076 ymin: -1470784 xmax: -757960.3 ymax: -235145.7 ## Projected CRS: US National Atlas Equal Area ##    NAME_1            area                       geometry ## 1 Arizona 295423.1 [km^2] POLYGON ((-852411.9 -135040... ## 2    Utah 219634.4 [km^2] POLYGON ((-1011317 -819521....
+```
+
+The result is shown in Figure [8.24](https://geobgu.xyz/r-2021/geometric-operations-with-vector-layers.html#fig:arizona-utah-union-by-state):
+
+```         
+plot(s2[, "area"])
+```
+
+Figure 8.24: Union by state name of `s`
+
+## Join by attributes
+
+Attaching new attributes to a vector layer from a table, based on common attribute(s), is known as a non-spatial join, or join *by attributes*. Joining by attributes works exactly the same way as a join between two tables, e.g., using the `merge` function (Section [4.6](https://geobgu.xyz/r-2021/tables-conditionals-and-loops.html#table-joins)). The difference is just that the \"left\" table, `x`, is an `sf` layer, instead of a `data.frame`. Using `merge` to join an `sf` layer with a `data.frame` is analogous to the \"Join attributes from a table\" workflow in ArcGIS (Figure [8.25](https://geobgu.xyz/r-2021/geometric-operations-with-vector-layers.html#fig:join-by-attrs-arcgis)).
+
+Figure 8.25: Join by attributes in ArcGIS
+
+In the next example we will join county-level demographic data, from `CO-EST2012-Alldata.csv`, with the `county` layer. The join will be based on the common *Federal Information Processing Standards (FIPS)* code of each county.
+
+First, let\'s read the `CO-EST2012-Alldata.csv` file into a `data.frame` named `dat`. This file contains numerous demographic variables, on the county level, in the US:
+
+```         
+dat = read.csv("CO-EST2012-Alldata.csv")
+```
+
+Next, we subset the columns we are interested in, so that it is easier to display the table:
+
+-   `STATE`---State code
+
+-   `COUNTY`---County code
+
+-   `CENSUS2010POP`---Population size in 2010
+
+The first two columns, `STATE` and `COUNTY`, contain the state and county components of the FIPS code, which we will use to join the data. The third column, `CENSUS2010POP`, contains our variable of interest, which we want to attach to the `county` layer.
+
+```         
+dat = dat[, c("STATE", "COUNTY", "CENSUS2010POP")] head(dat) ##   STATE COUNTY CENSUS2010POP ## 1     1      0       4779736 ## 2     1      1         54571 ## 3     1      3        182265 ## 4     1      5         27457 ## 5     1      7         22915 ## 6     1      9         57322
+```
+
+Records where `COUNTY` code is `0` are state sums, i.e. sub-totals. We need to remove the state sums and keep just the county-level records:
+
+```         
+dat = dat[dat$COUNTY != 0, ] head(dat) ##   STATE COUNTY CENSUS2010POP ## 2     1      1         54571 ## 3     1      3        182265 ## 4     1      5         27457 ## 5     1      7         22915 ## 6     1      9         57322 ## 7     1     11         10914
+```
+
+The FIPS code in the `county` layer is a character value with five digits, where the first two digits are the state code and the last three digits are the county code. When necessary, leading zeros are added. For example, state code `9` and county code `5` is encoded as `"09005"`.
+
+```         
+county$FIPS[1:6] ## [1] "09005" "09003" "09013" "09015" "06093" "06015"
+```
+
+while the `dat` table contains separate state and county codes as `numeric` values:
+
+```         
+dat$STATE[1:10] ##  [1] 1 1 1 1 1 1 1 1 1 1
+```
+
+```         
+dat$COUNTY[1:10] ##  [1]  1  3  5  7  9 11 13 15 17 19
+```
+
+To get the corresponding county FIPS codes in `dat`, we need to:
+
+-   Standardize the state code to a *two-digit* code
+
+-   Standardize the county code to *three-digit* code
+
+-   Paste the state code and the county code, to obtain the *five-digit* FIPS code
+
+The `formatC` function can be used to format numeric values into different *formats*, using different \"scenarios.\" The \"add leading zeros\" scenario is specified using `width=n`, where `n` is the required number of digits, and `flag="0"`. Therefore:
+
+```         
+dat$STATE = formatC(dat$STATE, width = 2, flag = "0") dat$COUNTY = formatC(dat$COUNTY, width = 3, flag = "0") dat$FIPS = paste0(dat$STATE, dat$COUNTY)
+```
+
+Now we have a column named `FIPS`, with FIPS codes in exactly the same format as in the `county` layer:
+
+```         
+head(dat) ##   STATE COUNTY CENSUS2010POP  FIPS ## 2    01    001         54571 01001 ## 3    01    003        182265 01003 ## 4    01    005         27457 01005 ## 5    01    007         22915 01007 ## 6    01    009         57322 01009 ## 7    01    011         10914 01011
+```
+
+This means we can join the `county` layer with the `dat` table, based on the common column named `FIPS`:
+
+```         
+county = merge(county, dat[, c("FIPS", "CENSUS2010POP")], by = "FIPS", all.x = TRUE) county ## Simple feature collection with 3103 features and 6 fields ## Geometry type: MULTIPOLYGON ## Dimension:     XY ## Bounding box:  xmin: -2031903 ymin: -2116922 xmax: 2516534 ymax: 732304.6 ## Projected CRS: US National Atlas Equal Area ## First 10 features: ##     FIPS  NAME_1   NAME_2 TYPE_2            area CENSUS2010POP ## 1  01001 Alabama  Autauga County 1562.805 [km^2]         54571 ## 2  01003 Alabama  Baldwin County 4247.589 [km^2]        182265 ## 3  01005 Alabama  Barbour County 2330.135 [km^2]         27457 ## 4  01007 Alabama     Bibb County 1621.356 [km^2]         22915 ## 5  01009 Alabama   Blount County 1692.125 [km^2]         57322 ## 6  01011 Alabama  Bullock County 1623.924 [km^2]         10914 ## 7  01013 Alabama   Butler County 2013.066 [km^2]         20947 ## 8  01015 Alabama  Calhoun County 1591.091 [km^2]        118572 ## 9  01017 Alabama Chambers County 1557.054 [km^2]         34215 ## 10 01019 Alabama Cherokee County 1549.770 [km^2]         25989 ##                          geometry ## 1  MULTIPOLYGON (((1225972 -12... ## 2  MULTIPOLYGON (((1200268 -15... ## 3  MULTIPOLYGON (((1408158 -13... ## 4  MULTIPOLYGON (((1207082 -12... ## 5  MULTIPOLYGON (((1260171 -11... ## 6  MULTIPOLYGON (((1370531 -12... ## 7  MULTIPOLYGON (((1280245 -13... ## 8  MULTIPOLYGON (((1313695 -11... ## 9  MULTIPOLYGON (((1374433 -12... ## 10 MULTIPOLYGON (((1333380 -10...
+```
+
+Note that we are using a left join, therefore the `county` layer retains all of its records, whether or not there is a match in the `dat` table (Section [4.6.2](https://geobgu.xyz/r-2021/tables-conditionals-and-loops.html#joining-tables)). Features in `county` that do not have a matching `FIPS` value in `dat` get `NA` in the new `CENSUS2010POP` column.
+
+A map of the new `CENSUS2010POP` attribute, using the default equal breaks, is shown in Figure [8.26](https://geobgu.xyz/r-2021/geometric-operations-with-vector-layers.html#fig:census-pop):
+
+```         
+plot(county[, "CENSUS2010POP"])
+```
+
+Figure 8.26: Population size per county in the US (equal breaks)
+
+Almost all counties fall into the first category, therefore the map is uniformely colored and not very informative. A map using *quantile* breaks (Figure [8.27](https://geobgu.xyz/r-2021/geometric-operations-with-vector-layers.html#fig:census-pop-quantile)) reveals the spatial pattern of population sizes more clearly:
+
+```         
+plot(county[, "CENSUS2010POP"], breaks = "quantile")
+```
+
+Figure 8.27: Population size per county in the US (quantile breaks)
+
+Another issue with the map is that county population size also depends on county *area*, which can make the pattern misleading in case when county area sizes are variable (which they are). To safely compare the counties we need to standardize population size by county area. In other words, we need to calculate population **density**:
+
+```         
+county$density = county$CENSUS2010POP / county$area
+```
+
+Note how the measurement units (km−2��−2, i.e., number of people per km2��2) for the new column are automatically determined based on the inputs:
+
+```         
+head(county$density) ## Units: [1/km^2] ## [1] 34.91863 42.91023 11.78344 14.13323 33.87575  6.72076
+```
+
+The map of population densities per county is shown in Figure [8.28](https://geobgu.xyz/r-2021/geometric-operations-with-vector-layers.html#fig:census-pop-density):
+
+```         
+plot(county[, "density"], breaks = "quantile")
+```
+
+Figure 8.28: Population density in the US, quantile breaks
+
+> How many features in `county` did not have a matching FIPS code in `dat`? What are their names?
+
+> How many features in `dat` do not have a matching FIPS code in `county`?
+
+We can also calculate the *average* population density in the US, by dividing the total population by the total area:
+
+```         
+sum(county$CENSUS2010POP, na.rm = TRUE) / sum(county$area) ## 39.2295 [1/km^2]
+```
+
+This is close to the population density in 2010 according to [Wikipedia](https://en.wikipedia.org/wiki/Contiguous_United_States), which is `40.015`.
+
+Simply averaging the `density` column gives an overestimation, because all counties get equal weight while in reality the smaller counties are more dense:
+
+```         
+mean(county$density, na.rm = TRUE) ## 93.87977 [1/km^2]
+```
+
+## Recap: main data structures
+
+Table [8.1](https://geobgu.xyz/r-2021/geometric-operations-with-vector-layers.html#tab:data-structures-in-course) summarizes the main data structures we learn in this book.
+
+|                      |                                   |                                                                                                                     |
+|----------------------|-----------------------------------|---------------------------------------------------------------------------------------------------------------------|
+|                      |                                   | Table 8.1: Main data structures in the book                                                                         |
+| **Category**         | **Class**                         | **Chapter**                                                                                                         |
+| Vector               | `numeric`, `character`, `logical` | [2](https://geobgu.xyz/r-2021/vectors.html#vectors)                                                                 |
+| Date                 | `Date`                            | [3](https://geobgu.xyz/r-2021/time-series-and-function-definitions.html#time-series-and-function-definitions)       |
+| Table                | `data.frame`                      | [4](https://geobgu.xyz/r-2021/tables-conditionals-and-loops.html#tables-conditionals-and-loops)                     |
+| Matrix               | `matrix`                          | [5](https://geobgu.xyz/r-2021/matrices-and-rasters.html#matrices-and-rasters)                                       |
+| Array                | `array`                           | [5](https://geobgu.xyz/r-2021/matrices-and-rasters.html#matrices-and-rasters)                                       |
+| Raster               | `stars`                           | [5](https://geobgu.xyz/r-2021/matrices-and-rasters.html#matrices-and-rasters)                                       |
+| Vector layer         | `sfg`, `sfc`, `sf`                | [7](https://geobgu.xyz/r-2021/vector-layers.html#vector-layers)                                                     |
+| Units                | `units`                           | [8](https://geobgu.xyz/r-2021/geometric-operations-with-vector-layers.html#geometric-operations-with-vector-layers) |
+| List                 | `list`                            | [11](https://geobgu.xyz/r-2021/processing-spatio-temporal-data.html#processing-spatio-temporal-data)                |
+| Geostatistical model | `gstat`                           | [12](https://geobgu.xyz/r-2021/spatial-interpolation-of-point-data.html#spatial-interpolation-of-point-data)        |
+| Variogram model      | `variogramModel`                  | [12](https://geobgu.xyz/r-2021/spatial-interpolation-of-point-data.html#spatial-interpolation-of-point-data)   
+
+
+
+|

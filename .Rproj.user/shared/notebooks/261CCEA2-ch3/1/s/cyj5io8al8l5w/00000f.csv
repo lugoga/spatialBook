@@ -1,0 +1,6 @@
+"0","#| label: fig-base"
+"0","#| fig-cap: Time series plotted with base-R"
+"0","#| echo: false"
+"0","#| "
+"0","ts_data |>"
+"0","  plot(main = ""Time Series Data"", xlab = ""Time"", ylab = ""Value"")"
